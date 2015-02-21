@@ -225,6 +225,63 @@ namespace WindowsFormsApplication1.Shapes
             if (FigureShapes.Last.GetType() == typeof(CustomEllipse))
                 FigureShapes.Remove(FigureShapes.Last);
         }
+        /// <summary>
+        /// Determines whether [is point in figure].
+        /// </summary>
+        /// <param name="point">The point.</param>
+        /// <param name="figure">The figure.</param>
+        /// <returns>True if the hit point is in a figure</returns>
+        public static bool IsPointInFigure(Point point, CustomFigure figure)
+        {
+            if (point.X < figure.MinX - 5 || point.X > figure.MaxX + 5
+                || point.Y < figure.MinY - 5 || point.Y > figure.MaxY + 5)
+                return false;
+
+            var firstVertex = figure.FirstNode;
+            var lastVertex = figure.LastNode;
+
+            bool isInFigure = false;
+
+            for (int i = 0; i < figure.VertexNumber; i++)
+            {
+                int iX = firstVertex.Value.Point.X;
+                int iY = firstVertex.Value.Point.Y;
+                int jX = lastVertex.Value.Point.X;
+                int jY = lastVertex.Value.Point.Y;
+
+                if ((iY > point.Y) != (jY > point.Y)
+                    && (point.X < (jX - iX) * (point.Y - iY) / (jY - iY) + iX))
+                    isInFigure = !isInFigure;
+                lastVertex = firstVertex;
+                firstVertex = firstVertex.Next;
+            }
+            return isInFigure;
+        }
+        /// <summary>
+        /// Determines whether the specified point is vertex.
+        /// </summary>
+        /// <param name="point">The point.</param>
+        /// <param name="figure">The figure.</param>
+        /// <param name="outVertex">The out vertex.</param>
+        /// <returns>True if the hit point is vertex, false otherwise</returns>
+        public static bool IsVertex(Point point, CustomFigure figure, out CustomVertex outVertex)
+        {
+            outVertex = null;
+
+            if (point.X < figure.MinX - 10 || point.X > figure.MaxX + 10
+                || point.Y < figure.MinY - 10 || point.Y > figure.MaxY + 10)
+                return false;
+
+            foreach (CustomVertex vertex in figure.FigureVertices.Where(
+                vertex => point.X < vertex.Point.X + 10 && point.X > vertex.Point.X - 10
+                    && point.Y < vertex.Point.Y + 10 && point.Y > vertex.Point.Y - 10))
+            {
+                outVertex = vertex;
+                return true;
+            }
+
+            return false;
+        }
         #endregion Public Methods
         #region Private Methods
         /// <summary>
