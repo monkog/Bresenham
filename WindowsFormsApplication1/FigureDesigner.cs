@@ -260,13 +260,15 @@ namespace WindowsFormsApplication1
             if (_doDrawFigure)
             {
                 Cursor = Cursors.Default;
-                SetButtonStates(addVertex: false, drawFigure: false, changeColor: false, changeThickness: false);
+                SetButtonStates(addVertex: false, drawFigure: false, changeColor: false
+                    , changeThickness: false, doMultisampling: false);
                 _currentFigure = null;
                 _isFirstVertex = true;
                 return;
             }
 
-            SetButtonStates(addVertex: false, drawFigure: true, changeColor: false, changeThickness: false);
+            SetButtonStates(addVertex: false, drawFigure: true, changeColor: false
+                , changeThickness: false, doMultisampling: false);
             Cursor = _dotCursor;
         }
         /// <summary>
@@ -279,7 +281,8 @@ namespace WindowsFormsApplication1
             if (_doAddVertex)
             {
                 Cursor = Cursors.Default;
-                SetButtonStates(addVertex: false, drawFigure: false, changeColor: false, changeThickness: false);
+                SetButtonStates(addVertex: false, drawFigure: false, changeColor: false
+                    , changeThickness: false, doMultisampling: false);
                 return;
             }
 
@@ -289,7 +292,8 @@ namespace WindowsFormsApplication1
                 return;
             }
 
-            SetButtonStates(addVertex: true, drawFigure: false, changeColor: false, changeThickness: false);
+            SetButtonStates(addVertex: true, drawFigure: false, changeColor: false
+                , changeThickness: false, doMultisampling: false);
 
             Cursor = _dotCursor;
         }
@@ -317,7 +321,8 @@ namespace WindowsFormsApplication1
 
             if (_doChangeColor && !_doDrawFigure)
             {
-                SetButtonStates(addVertex: false, drawFigure: false, changeColor: false, changeThickness: false);
+                SetButtonStates(addVertex: false, drawFigure: false, changeColor: false
+                    , changeThickness: false, doMultisampling: false);
                 return;
             }
 
@@ -331,7 +336,8 @@ namespace WindowsFormsApplication1
                 drawingArea.Refresh();
 
                 if (!_doDrawFigure)
-                    SetButtonStates(addVertex: false, drawFigure: false, changeColor: true, changeThickness: false);
+                    SetButtonStates(addVertex: false, drawFigure: false, changeColor: true
+                        , changeThickness: false, doMultisampling: false);
             }
         }
         /// <summary>
@@ -349,7 +355,8 @@ namespace WindowsFormsApplication1
 
             if (_doChangeThickness)
             {
-                SetButtonStates(addVertex: false, changeColor: false, changeThickness: false, drawFigure: false);
+                SetButtonStates(addVertex: false, changeColor: false, changeThickness: false
+                    , drawFigure: false, doMultisampling: false);
                 return;
             }
 
@@ -363,7 +370,8 @@ namespace WindowsFormsApplication1
             }
 
             if (!_doDrawFigure)
-                SetButtonStates(addVertex: false, drawFigure: false, changeColor: false, changeThickness: true);
+                SetButtonStates(addVertex: false, drawFigure: false, changeColor: false
+                    , changeThickness: true, doMultisampling: false);
 
             _strokeThickness = size;
             sizeLabel.Text = "CURRENT SIZE: " + size + " px";
@@ -378,7 +386,14 @@ namespace WindowsFormsApplication1
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void multisamplingButton_Click(object sender, EventArgs e)
         {
-            _doMultisample = true;
+            if (_doMultisample)
+            {
+                SetButtonStates(addVertex: false, drawFigure: false, changeColor: false
+                    , changeThickness: false, doMultisampling: false);
+                return;
+            }
+            SetButtonStates(addVertex: false, drawFigure: false, changeColor: false
+                , changeThickness: false, doMultisampling: true);
         }
         #endregion Event Methods
         #region Private Methods
@@ -389,7 +404,8 @@ namespace WindowsFormsApplication1
         {
             Cursor = Cursors.Default;
 
-            SetButtonStates(addVertex: false, drawFigure: false, changeColor: false, changeThickness: false);
+            SetButtonStates(addVertex: false, drawFigure: false, changeColor: false
+                , changeThickness: false, doMultisampling: false);
 
             _isFirstVertex = true;
             _figures.Clear();
@@ -516,16 +532,20 @@ namespace WindowsFormsApplication1
         /// <param name="drawFigure">if set to <c>true</c> [draw figure].</param>
         /// <param name="changeColor">if set to <c>true</c> [change color].</param>
         /// <param name="changeThickness">if set to <c>true</c> [change thickness].</param>
-        private void SetButtonStates(bool addVertex, bool drawFigure, bool changeColor, bool changeThickness)
+        /// <param name="doMultisampling">if set to <c>true</c> [do multisampling].</param>
+        private void SetButtonStates(bool addVertex, bool drawFigure, bool changeColor
+            , bool changeThickness, bool doMultisampling)
         {
             _doAddVertex = addVertex;
             _doDrawFigure = drawFigure;
             _doChangeColor = changeColor;
             _doChangeThickness = changeThickness;
+            _doMultisample = doMultisampling;
             changeColorButton.Text = changeColor ? "CANCEL" : "CHANGE COLOR";
             addVertexButton.Text = addVertex ? "CANCEL" : "ADD VERTEX";
             drawFigureButton.Text = drawFigure ? "CANCEL" : "DRAW FIGURE";
             changeSizeButton.Text = changeThickness ? "CANCEL" : "CHANGE SIZE";
+            multisamplingButton.Text = doMultisampling ? "CANCEL" : "MULTISAMPLING";
         }
         /// <summary>
         /// Selects the figure to move around the drawingArea.
