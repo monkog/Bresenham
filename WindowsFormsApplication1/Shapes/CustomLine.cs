@@ -46,8 +46,8 @@ namespace WindowsFormsApplication1.Shapes
         /// <param name="thickness">The thickness of the line.</param>
         public void Draw(Graphics graphics, Color color, int thickness)
         {
-            //multisampling(graphics, color, thickness);
             SymmetricBresenham(graphics, color, thickness);
+            Multisampling(graphics, color, thickness);
         }
         #endregion Public Methods
         #region Private Methods
@@ -71,12 +71,12 @@ namespace WindowsFormsApplication1.Shapes
             graphics.FillRectangle(new SolidBrush(color), new Rectangle(new Point(x2, y2), new Size(1, 1)));
 
             if (dx > dy)
-                DrawVerticalLine(graphics, color, x1, y1, x2, y2, dy, dx, incrX, incrY, upPixels, downPixels);
+                DrawLine(graphics, color, x1, y1, x2, y2, dy, dx, incrX, incrY, upPixels, downPixels, isHorizontal: true);
             else
-                DrawHorizontalLine(graphics, color, x1, y1, x2, y2, dx, dy, incrY, incrX, upPixels, downPixels);
+                DrawLine(graphics, color, y1, x1, y2, x2, dx, dy, incrY, incrX, upPixels, downPixels, isHorizontal: false);
         }
         /// <summary>
-        /// Draws the line that has a steapness of less than 45 deg.
+        /// Draws the line.
         /// </summary>
         /// <param name="graphics">The graphics.</param>
         /// <param name="color">The color.</param>
@@ -90,53 +90,9 @@ namespace WindowsFormsApplication1.Shapes
         /// <param name="dy">The step in y coordinate.</param>
         /// <param name="upPixels">Number of pixels to copy above the line.</param>
         /// <param name="downPixels">Number of pixels to copy below the line.</param>
-        private static void DrawHorizontalLine(Graphics graphics, Color color, int x1, int y1, int x2, int y2
-            , int dx, int dy,
-            int incrY, int incrX, int upPixels, int downPixels)
-        {
-            int xf = x1;
-            int yf = y1;
-            int xb = x2;
-            int yb = y2;
-            var incrE = 2 * dx;
-            var incrNe = 2 * (dx - dy);
-            var d = 2 * dx - dy;
-
-            while (yf != yb && yf - 1 != yb && yf + 1 != yb)
-            {
-                yf += incrY;
-                yb -= incrY;
-
-                if (d < 0) //Choose E and W
-                    d += incrE;
-                else //Choose NE and SW
-                {
-                    d += incrNe;
-                    xf += incrX;
-                    xb -= incrX;
-                }
-
-                DrawLineSegment(graphics, xf, yf, xb, yb, upPixels, downPixels, color, isLineHorizontal: true);
-            }
-        }
-        /// <summary>
-        /// Draws the line that has a steapness of more than 45 deg.
-        /// </summary>
-        /// <param name="graphics">The graphics.</param>
-        /// <param name="color">The color.</param>
-        /// <param name="x1">The x coordinate of the start point.</param>
-        /// <param name="x2">The x coordinate of the end point.</param>
-        /// <param name="y1">The y coordinate of the start point.</param>
-        /// <param name="y2">The y coordinate of the end point.</param>
-        /// <param name="incrX">The direction x coordinate. Positive value is right.</param>
-        /// <param name="incrY">The direction y coordinate. Positive value is up.</param>
-        /// <param name="dx">The step in x coordinate.</param>
-        /// <param name="dy">The step in y coordinate.</param>
-        /// <param name="upPixels">Number of pixels to copy above the line.</param>
-        /// <param name="downPixels">Number of pixels to copy below the line.</param>
-        private static void DrawVerticalLine(Graphics graphics, Color color, int x1, int y1, int x2, int y2
-            , int dy, int dx,
-            int incrX, int incrY, int upPixels, int downPixels)
+        /// <param name="isHorizontal">Is the line horizontal</param>
+        private static void DrawLine(Graphics graphics, Color color, int x1, int y1, int x2, int y2
+            , int dy, int dx, int incrX, int incrY, int upPixels, int downPixels, bool isHorizontal)
         {
             int xf = x1;
             int yf = y1;
@@ -159,7 +115,10 @@ namespace WindowsFormsApplication1.Shapes
                     yb -= incrY;
                 }
 
-                DrawLineSegment(graphics, xf, yf, xb, yb, upPixels, downPixels, color, isLineHorizontal: false);
+                if (isHorizontal)
+                    DrawLineSegment(graphics, xf, yf, xb, yb, upPixels, downPixels, color, isHorizontal);
+                else
+                    DrawLineSegment(graphics, yf, xf, yb, xb, upPixels, downPixels, color, isHorizontal);
             }
         }
         /// <summary>
@@ -212,42 +171,28 @@ namespace WindowsFormsApplication1.Shapes
             , out int incrX, out int incrY, out int dx, out int dy)
         {
             // Find the direction of drawing in x coordinate
-            if (x1 < x2)
-            {
-                incrX = 1;
-                dx = x2 - x1;
-            }
-            else
-            {
-                incrX = -1;
-                dx = x1 - x2;
-            }
+            incrX = x1 < x2 ? 1 : -1;
+            dx = Math.Abs(x1 - x2);
 
             // Find the direction of drawing in y coordinate
-            if (y1 < y2)
-            {
-                incrY = 1;
-                dy = y2 - y1;
-            }
-            else
-            {
-                incrY = -1;
-                dy = y1 - y2;
-            }
+            incrY = y1 < y2 ? 1 : -1;
+            dy = Math.Abs(y1 - y2);
         }
 
         private void Multisampling(Graphics graphics, Color color, int thickness)
         {
-            Bitmap bmp = new Bitmap(Math.Abs(StartPoint.X - EndPoint.X), Math.Abs(StartPoint.Y - EndPoint.Y));
+            return;
+            Bitmap bmp ;
+            //= new Bitmap(Math.Abs(StartPoint.X - EndPoint.X), Math.Abs(StartPoint.Y - EndPoint.Y));
 
-            Pen pen = new Pen(new SolidBrush(Color.Blue));
-            pen.EndCap = LineCap.Square;
-            pen.StartCap = LineCap.Square;
-            Point[] points = { new Point(0, 0), new Point(0, 2), new Point(bmp.Width - 2, bmp.Height), new Point(bmp.Width, bmp.Height) };
-            graphics.DrawPolygon(pen, points);
-
+            //Pen pen = new Pen(new SolidBrush(Color.Blue));
+            //pen.EndCap = LineCap.Square;
+            //pen.StartCap = LineCap.Square;
+            //Point[] points = { new Point(0, 0), new Point(0, 2), new Point(bmp.Width - 2, bmp.Height), new Point(bmp.Width, bmp.Height) };
+            //graphics.DrawPolygon(pen, points);
+            if(StartPoint == EndPoint)return;
+           
             bmp = new Bitmap(Math.Abs(StartPoint.X - EndPoint.X), Math.Abs(StartPoint.Y - EndPoint.Y), graphics);
-            graphics.Dispose();
             Point point;
             double alpha;
             for (int i = 0; i < bmp.Width; i += 2)
