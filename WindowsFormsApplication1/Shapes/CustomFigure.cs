@@ -129,15 +129,15 @@ namespace WindowsFormsApplication1.Shapes
         /// <param name="color">The color.</param>
         /// <param name="strokeThickness">The stroke thickness.</param>
         /// <param name="vertexSize">Size of the vertex</param>
-        public CustomFigure(Point point, Color color, int strokeThickness, int vertexSize)
+        public CustomFigure(Point point, Color color, int strokeThickness)
         {
             FigureColor = color;
             StrokeThickness = strokeThickness;
-            VertexSize = vertexSize;
+            VertexSize = StrokeThickness + 6;
             FigureVertices = new LinkedList<CustomVertex>();
             FigureVertices.AddFirst(new CustomVertex(point));
             FigureShapes = new LinkedList<IShape>();
-            FigureShapes.AddFirst(new CustomEllipse(point, 10));
+            FigureShapes.AddFirst(new CustomEllipse(point));
             MultisamplingLine = null;
             MultisamplingColor = Color.Azure;
             MaxX = point.X + 5;
@@ -171,7 +171,7 @@ namespace WindowsFormsApplication1.Shapes
                 return;
 
             FigureShapes.AddAfter(previousNode, new CustomLine(previousEllipse.Position, vertex.Point));
-            FigureShapes.AddAfter(previousNode.Next, new CustomEllipse(vertex.Point, 10));
+            FigureShapes.AddAfter(previousNode.Next, new CustomEllipse(vertex.Point));
             FigureShapes.AddAfter(previousNode.Next.Next, new CustomLine(vertex.Point, nextEllipse.Position));
             FigureShapes.Remove(line);
 
@@ -205,7 +205,7 @@ namespace WindowsFormsApplication1.Shapes
                 return;
 
             FigureVertices.AddLast(new CustomVertex(point));
-            FigureShapes.AddLast(new CustomEllipse(point, VertexSize));
+            FigureShapes.AddLast(new CustomEllipse(point));
             int delta = VertexSize / 2;
             if (point.X + delta > MaxX) MaxX = point.X + delta;
             if (point.X - delta < MinX) MinX = point.X - delta;

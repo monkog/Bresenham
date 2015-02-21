@@ -173,6 +173,7 @@ namespace WindowsFormsApplication1.Shapes
         /// <param name="upPixels">Number of pixels to copy above the line.</param>
         /// <param name="downPixels">Number of pixels to copy below the line.</param>
         /// <param name="color">The color.</param>
+        /// <param name="isLineHorizontal">Is the line's steapness less than 45 deg</param>
         private static void DrawLineSegment(Graphics graphics, int x1, int y1, int x2, int y2
             , int upPixels, int downPixels, Color color, bool isLineHorizontal)
         {

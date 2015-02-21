@@ -7,12 +7,6 @@ namespace WindowsFormsApplication1.Shapes
     /// </summary>
     public class CustomEllipse : IShape
     {
-        #region Private Members
-        /// <summary>
-        /// The size of the ellipse
-        /// </summary>
-        private int _size;
-        #endregion Private Members
         #region Public Properties
         /// <summary>
         /// Gets or sets the position of the ellipse.
@@ -27,14 +21,12 @@ namespace WindowsFormsApplication1.Shapes
         /// Initializes a new instance of the <see cref="CustomEllipse"/> class.
         /// </summary>
         /// <param name="position">The position.</param>
-        /// <param name="size">The size.</param>
-        public CustomEllipse(Point position, int size)
+        public CustomEllipse(Point position)
         {
             Position = position;
-            _size = size;
         }
         #endregion .ctor
-        #region IShape        
+        #region IShape
         /// <summary>
         /// Draws the ellipse.
         /// </summary>
@@ -43,7 +35,9 @@ namespace WindowsFormsApplication1.Shapes
         /// <param name="size">The size of ellipse.</param>
         public void Draw(Graphics graphics, Color color, int size)
         {
-            graphics.FillEllipse(new SolidBrush(color), new Rectangle(new Point(Position.X - 5, Position.Y - 5), new Size(_size, _size)));
+            size = size + 6;
+            int delta = size / 2;
+            graphics.FillEllipse(new SolidBrush(color), new Rectangle(new Point(Position.X - delta, Position.Y - delta), new Size(size, size)));
         }
         #endregion IShape
     }
