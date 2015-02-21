@@ -258,33 +258,33 @@ namespace WindowsFormsApplication1
                     if (shape.GetType() == typeof(CustomEllipse))
                     {
                         CustomEllipse ellipse = shape as CustomEllipse;
-                        if (ellipse.Point == _selectedVertex.Point)
+                        if (ellipse.Position == _selectedVertex.Point)
                         {
                             node = _selectedFigure.FigureShapes.Find(shape);
 
                             try
                             {
                                 CustomLine line = node.Previous.Value as CustomLine;
-                                line.MPoint2 = new Point(line.MPoint2.X - deltaX, line.MPoint2.Y - deltaY);
+                                line.EndPoint = new Point(line.EndPoint.X - deltaX, line.EndPoint.Y - deltaY);
                             }
                             catch (Exception)
                             {
                                 CustomLine line = _selectedFigure.FigureShapes.Last.Value as CustomLine;
-                                line.MPoint2 = new Point(line.MPoint2.X - deltaX, line.MPoint2.Y - deltaY);
+                                line.EndPoint = new Point(line.EndPoint.X - deltaX, line.EndPoint.Y - deltaY);
                             }
 
                             try
                             {
                                 CustomLine line = node.Next.Value as CustomLine;
-                                line.MPoint1 = new Point(line.MPoint1.X - deltaX, line.MPoint1.Y - deltaY);
+                                line.StartPoint = new Point(line.StartPoint.X - deltaX, line.StartPoint.Y - deltaY);
                             }
                             catch (Exception)
                             {
                                 CustomLine line = _selectedFigure.FigureShapes.First.Value as CustomLine;
-                                line.MPoint1 = new Point(line.MPoint1.X - deltaX, line.MPoint1.Y - deltaY);
+                                line.StartPoint = new Point(line.StartPoint.X - deltaX, line.StartPoint.Y - deltaY);
                             }
 
-                            ellipse.Point = new Point(ellipse.Point.X - deltaX, ellipse.Point.Y - deltaY);
+                            ellipse.Position = new Point(ellipse.Position.X - deltaX, ellipse.Position.Y - deltaY);
 
                             _selectedFigure.FigureVertices.Find(_selectedVertex).Value.Point = new Point(_selectedVertex.Point.X - deltaX, _selectedVertex.Point.Y - deltaY);
 
@@ -328,13 +328,13 @@ namespace WindowsFormsApplication1
                     if (shape.GetType() == typeof(CustomEllipse))
                     {
                         CustomEllipse ellipse = shape as CustomEllipse;
-                        ellipse.Point = new Point(ellipse.Point.X - deltaX, ellipse.Point.Y - deltaY);
+                        ellipse.Position = new Point(ellipse.Position.X - deltaX, ellipse.Position.Y - deltaY);
                     }
                     else
                     {
                         CustomLine line = shape as CustomLine;
-                        line.MPoint1 = new Point(line.MPoint1.X - deltaX, line.MPoint1.Y - deltaY);
-                        line.MPoint2 = new Point(line.MPoint2.X - deltaX, line.MPoint2.Y - deltaY);
+                        line.StartPoint = new Point(line.StartPoint.X - deltaX, line.StartPoint.Y - deltaY);
+                        line.EndPoint = new Point(line.EndPoint.X - deltaX, line.EndPoint.Y - deltaY);
                     }
 
                 foreach (CustomVertex vertex in _selectedFigure.FigureVertices)
@@ -354,7 +354,7 @@ namespace WindowsFormsApplication1
             {
                 if (_currentFigure.FigureShapes.Last<IShape>().GetType() == typeof(CustomLine))
                     _currentFigure.FigureShapes.Remove(_currentFigure.FigureShapes.Last<IShape>());
-                _currentFigure.FigureShapes.AddLast(new CustomLine(_currentFigure.GetLastVertex().Point, new Point(e.X, e.Y)));
+                _currentFigure.FigureShapes.AddLast(new CustomLine(_currentFigure.LastVertex.Point, new Point(e.X, e.Y)));
             }
 
             drawingArea.Refresh();
@@ -383,7 +383,7 @@ namespace WindowsFormsApplication1
                 if (_isFirstVertex)
                 {
                     _isFirstVertex = false;
-                    _currentFigure = new CustomFigure(_mouseUpPosition, _color, _strokeThickness);
+                    _currentFigure = new CustomFigure(_mouseUpPosition, _color, _strokeThickness, 10);
                 }
                 else
                 {
@@ -392,8 +392,8 @@ namespace WindowsFormsApplication1
                         if (_currentFigure.VertexNumber < 3) return;
                         _isFirstVertex = true;
                         _figures.Add(_currentFigure);
-                        _currentFigure.FigureShapes.Remove(_currentFigure.FigureShapes.Last<IShape>());
-                        _currentFigure.FigureShapes.AddLast(new CustomLine(_currentFigure.GetLastVertex().Point, _currentFigure.GetFirstVertex().Point));
+                        _currentFigure.FigureShapes.Remove(_currentFigure.FigureShapes.Last());
+                        _currentFigure.FigureShapes.AddLast(new CustomLine(_currentFigure.LastVertex.Point, _currentFigure.FirstVertex.Point));
                         drawingArea.Refresh();
                         _currentFigure = null;
                         return;
@@ -601,7 +601,7 @@ namespace WindowsFormsApplication1
         #region methods
         private bool IsFigureComplete(Point point)
         {
-            CustomVertex vertex = _currentFigure.GetFirstVertex();
+            CustomVertex vertex = _currentFigure.FirstVertex;
 
             return (Math.Abs(point.X - vertex.Point.X) < 10 && Math.Abs(point.Y - vertex.Point.Y) < 10);
         }
@@ -617,9 +617,9 @@ namespace WindowsFormsApplication1
                     {
                         CustomLine line = shape as CustomLine;
 
-                        double ab = Math.Sqrt((line.MPoint1.X - line.MPoint2.X) * (line.MPoint1.X - line.MPoint2.X) + (line.MPoint1.Y - line.MPoint2.Y) * (line.MPoint1.Y - line.MPoint2.Y));
-                        double ac = Math.Sqrt((point.X - line.MPoint1.X) * (point.X - line.MPoint1.X) + (point.Y - line.MPoint1.Y) * (point.Y - line.MPoint1.Y));
-                        double bc = Math.Sqrt((point.X - line.MPoint2.X) * (point.X - line.MPoint2.X) + (point.Y - line.MPoint2.Y) * (point.Y - line.MPoint2.Y));
+                        double ab = Math.Sqrt((line.StartPoint.X - line.EndPoint.X) * (line.StartPoint.X - line.EndPoint.X) + (line.StartPoint.Y - line.EndPoint.Y) * (line.StartPoint.Y - line.EndPoint.Y));
+                        double ac = Math.Sqrt((point.X - line.StartPoint.X) * (point.X - line.StartPoint.X) + (point.Y - line.StartPoint.Y) * (point.Y - line.StartPoint.Y));
+                        double bc = Math.Sqrt((point.X - line.EndPoint.X) * (point.X - line.EndPoint.X) + (point.Y - line.EndPoint.Y) * (point.Y - line.EndPoint.Y));
 
                         if (ac + bc < ab + 2 && ac + bc > ab - 2)
                         {
@@ -637,8 +637,8 @@ namespace WindowsFormsApplication1
             if (point.X < figure.MinX - 5 || point.X > figure.MaxX + 5 || point.Y < figure.MinY - 5 || point.Y > figure.MaxY + 5)
                 return false;
 
-            LinkedListNode<CustomVertex> currentFirstVertex = figure.GetFirstNode();
-            LinkedListNode<CustomVertex> currentLastVertex = figure.GetLastNode();
+            LinkedListNode<CustomVertex> currentFirstVertex = figure.FirstNode;
+            LinkedListNode<CustomVertex> currentLastVertex = figure.LastNode;
 
             bool isInFigure = false;
 
