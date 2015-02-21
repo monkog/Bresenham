@@ -90,7 +90,8 @@ namespace WindowsFormsApplication1.Shapes
         /// <param name="dy">The step in y coordinate.</param>
         /// <param name="upPixels">Number of pixels to copy above the line.</param>
         /// <param name="downPixels">Number of pixels to copy below the line.</param>
-        private static void DrawHorizontalLine(Graphics graphics, Color color, int x1, int y1, int x2, int y2, int dx, int dy,
+        private static void DrawHorizontalLine(Graphics graphics, Color color, int x1, int y1, int x2, int y2
+            , int dx, int dy,
             int incrY, int incrX, int upPixels, int downPixels)
         {
             int xf = x1;
@@ -115,7 +116,7 @@ namespace WindowsFormsApplication1.Shapes
                     xb -= incrX;
                 }
 
-                DrawLineSegment(graphics, xf, yf, xb, yb, upPixels, downPixels, color);
+                DrawLineSegment(graphics, xf, yf, xb, yb, upPixels, downPixels, color, isLineHorizontal: true);
             }
         }
         /// <summary>
@@ -133,7 +134,8 @@ namespace WindowsFormsApplication1.Shapes
         /// <param name="dy">The step in y coordinate.</param>
         /// <param name="upPixels">Number of pixels to copy above the line.</param>
         /// <param name="downPixels">Number of pixels to copy below the line.</param>
-        private static void DrawVerticalLine(Graphics graphics, Color color, int x1, int y1, int x2, int y2, int dy, int dx,
+        private static void DrawVerticalLine(Graphics graphics, Color color, int x1, int y1, int x2, int y2
+            , int dy, int dx,
             int incrX, int incrY, int upPixels, int downPixels)
         {
             int xf = x1;
@@ -157,7 +159,7 @@ namespace WindowsFormsApplication1.Shapes
                     yb -= incrY;
                 }
 
-                DrawLineSegment(graphics, xf, yf, xb, yb, upPixels, downPixels, color);
+                DrawLineSegment(graphics, xf, yf, xb, yb, upPixels, downPixels, color, isLineHorizontal: false);
             }
         }
         /// <summary>
@@ -171,17 +173,24 @@ namespace WindowsFormsApplication1.Shapes
         /// <param name="upPixels">Number of pixels to copy above the line.</param>
         /// <param name="downPixels">Number of pixels to copy below the line.</param>
         /// <param name="color">The color.</param>
-        private static void DrawLineSegment(Graphics graphics, int x1, int y1, int x2, int y2, int upPixels, int downPixels, Color color)
+        private static void DrawLineSegment(Graphics graphics, int x1, int y1, int x2, int y2
+            , int upPixels, int downPixels, Color color, bool isLineHorizontal)
         {
+            int horizontalMultiplier = isLineHorizontal ? 1 : 0;
+            int verticalMultiplier = 1 - horizontalMultiplier;
             for (int i = 0; i <= upPixels; i++)
             {
-                graphics.FillRectangle(new SolidBrush(color), new Rectangle(new Point(x1 + i, y1), new Size(1, 1)));
-                graphics.FillRectangle(new SolidBrush(color), new Rectangle(new Point(x2 + i, y2), new Size(1, 1)));
+                graphics.FillRectangle(new SolidBrush(color), new Rectangle(new Point(
+                    x1 + i * horizontalMultiplier, y1 + i * verticalMultiplier), new Size(1, 1)));
+                graphics.FillRectangle(new SolidBrush(color), new Rectangle(new Point(
+                    x2 + i * horizontalMultiplier, y2 + i * verticalMultiplier), new Size(1, 1)));
             }
             for (int i = 0; i <= downPixels; i++)
             {
-                graphics.FillRectangle(new SolidBrush(color), new Rectangle(new Point(x1 - i, y1), new Size(1, 1)));
-                graphics.FillRectangle(new SolidBrush(color), new Rectangle(new Point(x2 - i, y2), new Size(1, 1)));
+                graphics.FillRectangle(new SolidBrush(color), new Rectangle(new Point(
+                    x1 - i * horizontalMultiplier, y1 - i * verticalMultiplier), new Size(1, 1)));
+                graphics.FillRectangle(new SolidBrush(color), new Rectangle(new Point(
+                    x2 - i * horizontalMultiplier, y2 - i * verticalMultiplier), new Size(1, 1)));
             }
         }
         /// <summary>
