@@ -50,8 +50,14 @@
     <Compile Include="FigureDesigner.Designer.cs">
       <DependentUpon>FigureDesigner.cs</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\PromptWindow.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Shapes\CustomEllipse.cs" />
+    <Compile Include="Shapes\CustomFigure.cs" />
+    <Compile Include="Shapes\CustomLine.cs" />
+    <Compile Include="Shapes\CustomVertex.cs" />
+    <Compile Include="Shapes\IShape.cs" />
     <EmbeddedResource Include="FigureDesigner.resx">
       <DependentUpon>FigureDesigner.cs</DependentUpon>
     </EmbeddedResource>

@@ -5,6 +5,8 @@ using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using WindowsFormsApplication1.Helpers;
+using WindowsFormsApplication1.Shapes;
 
 namespace WindowsFormsApplication1
 {
@@ -42,7 +44,6 @@ namespace WindowsFormsApplication1
         private CustomFigure _multisamplingFigure;
         private bool _doMultisample;
         #endregion
-
 
         /// <summary>
         /// Used for importing cursor images
@@ -125,28 +126,28 @@ namespace WindowsFormsApplication1
         private void drawingArea_Paint(object sender, PaintEventArgs e)
         {
             if (_currentFigure != null)
-                foreach (CustomShape shape in _currentFigure.MFigureShapes)
-                    shape.Draw(e.Graphics, _currentFigure.MFigureColor, _currentFigure.MStrokeThickness);
+                foreach (IShape shape in _currentFigure.FigureShapes)
+                    shape.Draw(e.Graphics, _currentFigure.FigureColor, _currentFigure.StrokeThickness);
             if (_figures.Count != 0)
                 foreach (CustomFigure figure in _figures)
                 {
                     if (_doMultisample && _multisamplingFigure == figure && _selectedLine != null)
                     {
-                        foreach (CustomShape shape in figure.MFigureShapes)
+                        foreach (IShape shape in figure.FigureShapes)
                             if (shape.GetType() == typeof(CustomLine))
                             {
                                 CustomLine line = shape as CustomLine;
                                 if (line == _selectedLine)
-                                    shape.Draw(e.Graphics, figure.MMultisamplingColor, figure.MStrokeThickness);
+                                    shape.Draw(e.Graphics, figure.MultisamplingColor, figure.StrokeThickness);
                                 else
-                                    shape.Draw(e.Graphics, figure.MFigureColor, figure.MStrokeThickness);
+                                    shape.Draw(e.Graphics, figure.FigureColor, figure.StrokeThickness);
                             }
                             else
-                                shape.Draw(e.Graphics, figure.MFigureColor, figure.MStrokeThickness);
+                                shape.Draw(e.Graphics, figure.FigureColor, figure.StrokeThickness);
                     }
                     else
-                        foreach (CustomShape shape in figure.MFigureShapes)
-                            shape.Draw(e.Graphics, figure.MFigureColor, figure.MStrokeThickness);
+                        foreach (IShape shape in figure.FigureShapes)
+                            shape.Draw(e.Graphics, figure.FigureColor, figure.StrokeThickness);
                 }
         }
 
@@ -175,11 +176,11 @@ namespace WindowsFormsApplication1
                         if (IsPointOnBorder(e.Location, out outFigure, out outLine))
                         {
                             if (_multisamplingFigure != null)
-                                _multisamplingFigure.MMultisamplingLine = null;
+                                _multisamplingFigure.MultisamplingLine = null;
 
                             _multisamplingFigure = outFigure;
                             _selectedLine = outLine;
-                            figure.MMultisamplingLine = outLine;
+                            figure.MultisamplingLine = outLine;
                             drawingArea.Refresh();
                             return;
                         }
@@ -251,15 +252,15 @@ namespace WindowsFormsApplication1
                     return;
 
                 Cursor = _handCursor;
-                LinkedListNode<CustomShape> node;
+                LinkedListNode<IShape> node;
 
-                foreach (CustomShape shape in _selectedFigure.MFigureShapes)
+                foreach (IShape shape in _selectedFigure.FigureShapes)
                     if (shape.GetType() == typeof(CustomEllipse))
                     {
                         CustomEllipse ellipse = shape as CustomEllipse;
-                        if (ellipse.MPoint == _selectedVertex.Point)
+                        if (ellipse.Point == _selectedVertex.Point)
                         {
-                            node = _selectedFigure.MFigureShapes.Find(shape);
+                            node = _selectedFigure.FigureShapes.Find(shape);
 
                             try
                             {
@@ -268,7 +269,7 @@ namespace WindowsFormsApplication1
                             }
                             catch (Exception)
                             {
-                                CustomLine line = _selectedFigure.MFigureShapes.Last.Value as CustomLine;
+                                CustomLine line = _selectedFigure.FigureShapes.Last.Value as CustomLine;
                                 line.MPoint2 = new Point(line.MPoint2.X - deltaX, line.MPoint2.Y - deltaY);
                             }
 
@@ -279,27 +280,27 @@ namespace WindowsFormsApplication1
                             }
                             catch (Exception)
                             {
-                                CustomLine line = _selectedFigure.MFigureShapes.First.Value as CustomLine;
+                                CustomLine line = _selectedFigure.FigureShapes.First.Value as CustomLine;
                                 line.MPoint1 = new Point(line.MPoint1.X - deltaX, line.MPoint1.Y - deltaY);
                             }
 
-                            ellipse.MPoint = new Point(ellipse.MPoint.X - deltaX, ellipse.MPoint.Y - deltaY);
+                            ellipse.Point = new Point(ellipse.Point.X - deltaX, ellipse.Point.Y - deltaY);
 
-                            _selectedFigure.MFigureVertices.Find(_selectedVertex).Value.Point = new Point(_selectedVertex.Point.X - deltaX, _selectedVertex.Point.Y - deltaY);
+                            _selectedFigure.FigureVertices.Find(_selectedVertex).Value.Point = new Point(_selectedVertex.Point.X - deltaX, _selectedVertex.Point.Y - deltaY);
 
                             drawingArea.Refresh();
 
-                            _selectedFigure.MMaxX = int.MinValue;
-                            _selectedFigure.MMaxY = int.MinValue;
-                            _selectedFigure.MMinX = int.MaxValue;
-                            _selectedFigure.MMinY = int.MaxValue;
+                            _selectedFigure.MaxX = int.MinValue;
+                            _selectedFigure.MaxY = int.MinValue;
+                            _selectedFigure.MinX = int.MaxValue;
+                            _selectedFigure.MinY = int.MaxValue;
 
-                            foreach (CustomVertex vertex in _selectedFigure.MFigureVertices)
+                            foreach (CustomVertex vertex in _selectedFigure.FigureVertices)
                             {
-                                if (vertex.Point.X < _selectedFigure.MMinX) _selectedFigure.MMinX = vertex.Point.X;
-                                if (vertex.Point.Y < _selectedFigure.MMinY) _selectedFigure.MMinY = vertex.Point.Y;
-                                if (vertex.Point.X > _selectedFigure.MMaxX) _selectedFigure.MMaxX = vertex.Point.X;
-                                if (vertex.Point.Y > _selectedFigure.MMaxY) _selectedFigure.MMaxY = vertex.Point.Y;
+                                if (vertex.Point.X < _selectedFigure.MinX) _selectedFigure.MinX = vertex.Point.X;
+                                if (vertex.Point.Y < _selectedFigure.MinY) _selectedFigure.MinY = vertex.Point.Y;
+                                if (vertex.Point.X > _selectedFigure.MaxX) _selectedFigure.MaxX = vertex.Point.X;
+                                if (vertex.Point.Y > _selectedFigure.MaxY) _selectedFigure.MaxY = vertex.Point.Y;
                             }
 
                             _mouseLastPosition = e.Location;
@@ -315,19 +316,19 @@ namespace WindowsFormsApplication1
                 int deltaY = _mouseLastPosition.Y - e.Y;
 
                 // Prevent draging the figure outside the drawing area, so that it won't loose it's vertices and edges.
-                if (_selectedFigure.MMaxX - deltaX > drawingArea.Bounds.Width - 10
-                    || _selectedFigure.MMaxY - deltaY > drawingArea.Bounds.Height - 10
-                    || _selectedFigure.MMinX - deltaX < 5
-                    || _selectedFigure.MMinY - deltaY < 5)
+                if (_selectedFigure.MaxX - deltaX > drawingArea.Bounds.Width - 10
+                    || _selectedFigure.MaxY - deltaY > drawingArea.Bounds.Height - 10
+                    || _selectedFigure.MinX - deltaX < 5
+                    || _selectedFigure.MinY - deltaY < 5)
                     return;
 
                 Cursor = Cursors.SizeAll;
 
-                foreach (CustomShape shape in _selectedFigure.MFigureShapes)
+                foreach (IShape shape in _selectedFigure.FigureShapes)
                     if (shape.GetType() == typeof(CustomEllipse))
                     {
                         CustomEllipse ellipse = shape as CustomEllipse;
-                        ellipse.MPoint = new Point(ellipse.MPoint.X - deltaX, ellipse.MPoint.Y - deltaY);
+                        ellipse.Point = new Point(ellipse.Point.X - deltaX, ellipse.Point.Y - deltaY);
                     }
                     else
                     {
@@ -336,13 +337,13 @@ namespace WindowsFormsApplication1
                         line.MPoint2 = new Point(line.MPoint2.X - deltaX, line.MPoint2.Y - deltaY);
                     }
 
-                foreach (CustomVertex vertex in _selectedFigure.MFigureVertices)
+                foreach (CustomVertex vertex in _selectedFigure.FigureVertices)
                     vertex.Point = new Point(vertex.Point.X - deltaX, vertex.Point.Y - deltaY);
 
-                _selectedFigure.MMaxX -= deltaX;
-                _selectedFigure.MMinX -= deltaX;
-                _selectedFigure.MMaxY -= deltaY;
-                _selectedFigure.MMinY -= deltaY;
+                _selectedFigure.MaxX -= deltaX;
+                _selectedFigure.MinX -= deltaX;
+                _selectedFigure.MaxY -= deltaY;
+                _selectedFigure.MinY -= deltaY;
 
                 _mouseLastPosition = e.Location;
             }
@@ -351,9 +352,9 @@ namespace WindowsFormsApplication1
             // Draws a temporary ine between the last vertex and current mouse position.
             if (_doDrawFigure && _currentFigure != null)
             {
-                if (_currentFigure.MFigureShapes.Last<CustomShape>().GetType() == typeof(CustomLine))
-                    _currentFigure.MFigureShapes.Remove(_currentFigure.MFigureShapes.Last<CustomShape>());
-                _currentFigure.MFigureShapes.AddLast(new CustomLine(_currentFigure.GetLastVertex().Point, new Point(e.X, e.Y)));
+                if (_currentFigure.FigureShapes.Last<IShape>().GetType() == typeof(CustomLine))
+                    _currentFigure.FigureShapes.Remove(_currentFigure.FigureShapes.Last<IShape>());
+                _currentFigure.FigureShapes.AddLast(new CustomLine(_currentFigure.GetLastVertex().Point, new Point(e.X, e.Y)));
             }
 
             drawingArea.Refresh();
@@ -388,11 +389,11 @@ namespace WindowsFormsApplication1
                 {
                     if (IsFigureComplete(_mouseUpPosition))
                     {
-                        if (_currentFigure.MVertexNumber < 3) return;
+                        if (_currentFigure.VertexNumber < 3) return;
                         _isFirstVertex = true;
                         _figures.Add(_currentFigure);
-                        _currentFigure.MFigureShapes.Remove(_currentFigure.MFigureShapes.Last<CustomShape>());
-                        _currentFigure.MFigureShapes.AddLast(new CustomLine(_currentFigure.GetLastVertex().Point, _currentFigure.GetFirstVertex().Point));
+                        _currentFigure.FigureShapes.Remove(_currentFigure.FigureShapes.Last<IShape>());
+                        _currentFigure.FigureShapes.AddLast(new CustomLine(_currentFigure.GetLastVertex().Point, _currentFigure.GetFirstVertex().Point));
                         drawingArea.Refresh();
                         _currentFigure = null;
                         return;
@@ -410,7 +411,7 @@ namespace WindowsFormsApplication1
 
                 if (IsPointOnBorder(e.Location, out outFigure, out outLine))
                 {
-                    outFigure.MFigureColor = _color;
+                    outFigure.FigureColor = _color;
                     drawingArea.Refresh();
                     return;
                 }
@@ -424,7 +425,7 @@ namespace WindowsFormsApplication1
 
                 if (IsPointOnBorder(e.Location, out outFigure, out outLine))
                 {
-                    outFigure.MStrokeThickness = _strokeThickness;
+                    outFigure.StrokeThickness = _strokeThickness;
                     drawingArea.Refresh();
                     return;
                 }
@@ -516,7 +517,7 @@ namespace WindowsFormsApplication1
 
         private void changeColorButton_Click(object sender, EventArgs e)
         {
-            if (_doDrawFigure && _currentFigure != null && _currentFigure.MVertexNumber != 0)
+            if (_doDrawFigure && _currentFigure != null && _currentFigure.VertexNumber != 0)
             {
                 MessageBox.Show("You have to finish drawing to use this functionality.", "Don't do that!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
@@ -555,7 +556,7 @@ namespace WindowsFormsApplication1
 
         private void changeSizeButton_Click(object sender, EventArgs e)
         {
-            if (_doDrawFigure && _currentFigure != null && _currentFigure.MVertexNumber != 0)
+            if (_doDrawFigure && _currentFigure != null && _currentFigure.VertexNumber != 0)
             {
                 MessageBox.Show("You have to finish drawing to use this functionality.", "Don't do that!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
@@ -578,7 +579,7 @@ namespace WindowsFormsApplication1
                 return;
             }
 
-            string result = Prompt.ShowDialog("Determine the thickness of line. For best results use value lower than 10 px.", "Choose line thickness");
+            string result = PromptWindow.ShowDialog("Determine the thickness of line. For best results use value lower than 10 px.", "Choose line thickness");
             int size = int.MaxValue;
 
             if (!int.TryParse(result, out size) || size < 0 || size > 10)
@@ -611,7 +612,7 @@ namespace WindowsFormsApplication1
             outLine = null;
 
             foreach (CustomFigure figure in _figures)
-                foreach (CustomShape shape in figure.MFigureShapes)
+                foreach (IShape shape in figure.FigureShapes)
                     if (shape.GetType() == typeof(CustomLine))
                     {
                         CustomLine line = shape as CustomLine;
@@ -633,7 +634,7 @@ namespace WindowsFormsApplication1
 
         private bool IsPointInFigure(Point point, CustomFigure figure)
         {
-            if (point.X < figure.MMinX - 5 || point.X > figure.MMaxX + 5 || point.Y < figure.MMinY - 5 || point.Y > figure.MMaxY + 5)
+            if (point.X < figure.MinX - 5 || point.X > figure.MaxX + 5 || point.Y < figure.MinY - 5 || point.Y > figure.MaxY + 5)
                 return false;
 
             LinkedListNode<CustomVertex> currentFirstVertex = figure.GetFirstNode();
@@ -641,7 +642,7 @@ namespace WindowsFormsApplication1
 
             bool isInFigure = false;
 
-            for (int i = 0, j = figure.MVertexNumber - 1; i < figure.MVertexNumber; j = i++)
+            for (int i = 0, j = figure.VertexNumber - 1; i < figure.VertexNumber; j = i++)
             {
                 int iX = currentFirstVertex.Value.Point.X;
                 int iY = currentFirstVertex.Value.Point.Y;
@@ -661,10 +662,10 @@ namespace WindowsFormsApplication1
         {
             outVertex = null;
 
-            if (point.X < figure.MMinX - 10 || point.X > figure.MMaxX + 10 || point.Y < figure.MMinY - 10 || point.Y > figure.MMaxY + 10)
+            if (point.X < figure.MinX - 10 || point.X > figure.MaxX + 10 || point.Y < figure.MinY - 10 || point.Y > figure.MaxY + 10)
                 return false;
 
-            foreach (CustomVertex vertex in figure.MFigureVertices)
+            foreach (CustomVertex vertex in figure.FigureVertices)
                 if (point.X < vertex.Point.X + 10 && point.X > vertex.Point.X - 10
                     && point.Y < vertex.Point.Y + 10 && point.Y > vertex.Point.Y - 10)
                 {
@@ -681,338 +682,4 @@ namespace WindowsFormsApplication1
         }
         #endregion
     }
-
-    #region classes
-    public class CustomVertex
-    {
-        public CustomVertex(Point point)
-        {
-            Point = point;
-        }
-
-        public Point Point { get; set; }
-    }
-
-    public class CustomFigure
-    {
-        public CustomFigure(Point point, Color color, int strokeThickness)
-        {
-            MFigureColor = color;
-            MStrokeThickness = strokeThickness;
-            MFigureVertices = new LinkedList<CustomVertex>();
-            MFigureVertices.AddFirst(new CustomVertex(point));
-            MFigureShapes = new LinkedList<CustomShape>();
-            MFigureShapes.AddFirst(new CustomEllipse(point));
-            MMultisamplingLine = null;
-            MMultisamplingColor = Color.Azure;
-            MMaxX = point.X + 5;
-            MMinX = point.X - 5;
-            MMaxY = point.Y + 5;
-            MMinY = point.Y - 5;
-            MVertexNumber++;
-        }
-
-        public void AddInbetweenVertex(CustomVertex vertex, CustomLine line)
-        {
-            LinkedListNode<CustomShape> previousNode = MFigureShapes.Find(line).Previous;
-            LinkedListNode<CustomShape> nextNode = MFigureShapes.Find(line).Next;
-
-            CustomEllipse previousEllipse = previousNode.Value as CustomEllipse;
-            CustomEllipse nextEllipse;
-
-            if (nextNode == null)
-                nextEllipse = MFigureShapes.First.Value as CustomEllipse;
-            else
-                nextEllipse = nextNode.Value as CustomEllipse;
-
-            if (((Math.Abs(vertex.Point.X - previousEllipse.MPoint.X) < 10 && Math.Abs(vertex.Point.Y - previousEllipse.MPoint.Y) < 10)
-                || (Math.Abs(vertex.Point.X - nextEllipse.MPoint.X) < 10) && Math.Abs(vertex.Point.Y - nextEllipse.MPoint.Y) < 10))
-                return;
-
-            MFigureShapes.AddAfter(previousNode, new CustomLine(previousEllipse.MPoint, vertex.Point));
-            MFigureShapes.AddAfter(previousNode.Next, new CustomEllipse(vertex.Point));
-            MFigureShapes.AddAfter(previousNode.Next.Next, new CustomLine(vertex.Point, nextEllipse.MPoint));
-            MFigureShapes.Remove(line);
-
-            MFigureVertices.AddAfter(MFigureVertices.Find(FindVertexWithValue(previousEllipse.MPoint)), vertex);
-
-            MVertexNumber++;
-
-            if (vertex.Point.X + 5 > MMaxX) MMaxX = vertex.Point.X + 5;
-            if (vertex.Point.X - 5 < MMinX) MMinX = vertex.Point.X - 5;
-            if (vertex.Point.Y + 5 > MMaxY) MMaxY = vertex.Point.Y + 5;
-            if (vertex.Point.Y - 5 < MMinY) MMinY = vertex.Point.Y - 5;
-        }
-
-        public void AddVertex(Point point)
-        {
-            foreach (CustomVertex vertex in MFigureVertices)
-                if (Math.Abs(vertex.Point.X - point.X) < 10 && Math.Abs(vertex.Point.Y - point.Y) < 10)
-                    return;
-
-            MFigureVertices.AddLast(new CustomVertex(point));
-            MFigureShapes.AddLast(new CustomEllipse(point));
-            if (point.X + 5 > MMaxX) MMaxX = point.X + 5;
-            if (point.X - 5 < MMinX) MMinX = point.X - 5;
-            if (point.Y + 5 > MMaxY) MMaxY = point.Y + 5;
-            if (point.Y - 5 < MMinY) MMinY = point.Y - 5;
-            MVertexNumber++;
-        }
-
-        public void DeleteVertex(CustomVertex vertex)
-        {
-            MFigureVertices.Remove(vertex);
-            MVertexNumber--;
-
-            if (MFigureShapes.Last.GetType() == typeof(CustomEllipse))
-                MFigureShapes.Remove(MFigureShapes.Last);
-        }
-
-        private CustomVertex FindVertexWithValue(Point point)
-        {
-            foreach (CustomVertex vertex in MFigureVertices)
-                if (vertex.Point == point)
-                    return vertex;
-            return null;
-        }
-
-        public LinkedListNode<CustomVertex> GetFirstNode()
-        {
-            return MFigureVertices.First;
-        }
-
-        public LinkedListNode<CustomVertex> GetLastNode()
-        {
-            return MFigureVertices.Last;
-        }
-
-        public CustomVertex GetFirstVertex()
-        {
-            return MFigureVertices.First.Value;
-        }
-
-        public CustomVertex GetLastVertex()
-        {
-            return MFigureVertices.Last.Value;
-        }
-
-        public CustomVertex GetPreviousVertex(CustomVertex vertex)
-        {
-            return MFigureVertices.Find(vertex).Previous.Value;
-        }
-
-        public Color MFigureColor { get; set; }
-        public int MStrokeThickness { get; set; }
-        public int MMaxX { get; set; }
-        public int MMaxY { get; set; }
-        public int MMinX { get; set; }
-        public int MMinY { get; set; }
-        public int MVertexNumber { get; set; }
-        public LinkedList<CustomShape> MFigureShapes;
-        public LinkedList<CustomVertex> MFigureVertices;
-        public CustomLine MMultisamplingLine { get; set; }
-        public Color MMultisamplingColor { get; set; }
-    }
-
-    abstract public class CustomShape
-    {
-        abstract public void Draw(Graphics graphics, Color color, int thickness);
-    }
-
-    public class CustomLine : CustomShape
-    {
-        public CustomLine(Point p1, Point p2)
-        {
-            MPoint1 = p1;
-            MPoint2 = p2;
-        }
-
-        public override void Draw(Graphics graphics, Color color, int thickness)
-        {
-            //multisampling(graphics, color, thickness);
-            SymmetricBresenham(graphics, color, thickness);
-        }
-
-        private void SymmetricBresenham(Graphics graphics, Color color, int thickness)
-        {
-            int upPixels = (thickness - 1) / 2;
-            int downPixels = thickness - 1 - upPixels;
-
-            int x1 = MPoint1.X, x2 = MPoint2.X, y1 = MPoint1.Y, y2 = MPoint2.Y;
-            int incrX, incrY, d, dx, dy, incrNe, incrE;
-
-            if (x1 < x2)
-            {
-                incrX = 1;
-                dx = x2 - x1;
-            }
-            else
-            {
-                incrX = -1;
-                dx = x1 - x2;
-            }
-
-            if (y1 < y2)
-            {
-                incrY = 1;
-                dy = y2 - y1;
-            }
-            else
-            {
-                incrY = -1;
-                dy = y1 - y2;
-            }
-
-            int xf = x1;
-            int yf = y1;
-            int xb = x2;
-            int yb = y2;
-
-            graphics.FillRectangle(new SolidBrush(color), new Rectangle(new Point(xf, yf), new Size(1, 1)));
-            graphics.FillRectangle(new SolidBrush(color), new Rectangle(new Point(xb, yb), new Size(1, 1)));
-
-            if (dx > dy)
-            {
-                incrE = 2 * dy;
-                incrNe = 2 * (dy - dx);
-                d = 2 * dy - dx;
-
-                while (xf != xb && xf - 1 != xb && xf + 1 != xb)
-                {
-                    xf += incrX;
-                    xb -= incrX;
-                    if (d < 0) //Choose E and W
-                        d += incrE;
-                    else //Choose NE and SW
-                    {
-                        d += incrNe;
-                        yf += incrY;
-                        yb -= incrY;
-                    }
-                    graphics.FillRectangle(new SolidBrush(color), new Rectangle(new Point(xf, yf), new Size(1, 1)));
-                    graphics.FillRectangle(new SolidBrush(color), new Rectangle(new Point(xb, yb), new Size(1, 1)));
-
-                    for (int i = 1; i <= upPixels; i++)
-                    {
-                        graphics.FillRectangle(new SolidBrush(color), new Rectangle(new Point(xf, yf + i), new Size(1, 1)));
-                        graphics.FillRectangle(new SolidBrush(color), new Rectangle(new Point(xb, yb + i), new Size(1, 1)));
-                    }
-                    for (int i = 1; i <= downPixels; i++)
-                    {
-                        graphics.FillRectangle(new SolidBrush(color), new Rectangle(new Point(xf, yf - i), new Size(1, 1)));
-                        graphics.FillRectangle(new SolidBrush(color), new Rectangle(new Point(xb, yb - i), new Size(1, 1)));
-                    }
-                }
-            }
-            else
-            {
-                incrE = 2 * dx;
-                incrNe = 2 * (dx - dy);
-                d = 2 * dx - dy;
-
-                while (yf != yb && yf - 1 != yb && yf + 1 != yb)
-                {
-                    yf += incrY;
-                    yb -= incrY;
-
-                    if (d < 0) //Choose E and W
-                        d += incrE;
-                    else //Choose NE and SW
-                    {
-                        d += incrNe;
-                        xf += incrX;
-                        xb -= incrX;
-                    }
-                    graphics.FillRectangle(new SolidBrush(color), new Rectangle(new Point(xf, yf), new Size(1, 1)));
-                    graphics.FillRectangle(new SolidBrush(color), new Rectangle(new Point(xb, yb), new Size(1, 1)));
-
-                    for (int i = 1; i <= upPixels; i++)
-                    {
-                        graphics.FillRectangle(new SolidBrush(color), new Rectangle(new Point(xf + i, yf), new Size(1, 1)));
-                        graphics.FillRectangle(new SolidBrush(color), new Rectangle(new Point(xb + i, yb), new Size(1, 1)));
-                    }
-                    for (int i = 1; i <= downPixels; i++)
-                    {
-                        graphics.FillRectangle(new SolidBrush(color), new Rectangle(new Point(xf - i, yf), new Size(1, 1)));
-                        graphics.FillRectangle(new SolidBrush(color), new Rectangle(new Point(xb - i, yb), new Size(1, 1)));
-                    }
-                }
-            }
-        }
-
-        private void Multisampling(Graphics graphics, Color color, int thickness)
-        {
-            Bitmap bmp = new Bitmap(Math.Abs(MPoint1.X - MPoint2.X), Math.Abs(MPoint1.Y - MPoint2.Y));
-
-            Pen pen = new Pen(new SolidBrush(Color.Blue));
-            pen.EndCap = LineCap.Square;
-            pen.StartCap = LineCap.Square;
-            Point[] points = { new Point(0, 0), new Point(0, 2), new Point(bmp.Width - 2, bmp.Height), new Point(bmp.Width, bmp.Height) };
-            graphics.DrawPolygon(pen, points);
-
-            bmp = new Bitmap(Math.Abs(MPoint1.X - MPoint2.X), Math.Abs(MPoint1.Y - MPoint2.Y), graphics);
-            graphics.Dispose();
-            Point point;
-            double alpha;
-            for (int i = 0; i < bmp.Width; i += 2)
-                for (int j = 0; j < bmp.Height; i += 2)
-                {
-                    alpha = 0;
-                    point = new Point(i / 2, j / 2);
-                    for (int k = 0; k < 2; k++)
-                        for (int l = 0; l < 2; l++)
-                            if (bmp.GetPixel(k, l) == Color.Blue)
-                                alpha++;
-                    alpha /= 4;
-                    graphics.FillRectangle(new SolidBrush(Color.FromArgb((int)(alpha * 255), color)), new Rectangle(point, new Size(1, 1)));
-                }
-        }
-
-        void IntensifyPixel(int x, int y, double distance, Graphics graphics, Color color)
-        {
-            double intensity = Math.Round(Math.Abs(distance));
-            int intIntensity = (int)(intensity * 255);
-            graphics.FillRectangle(new SolidBrush(Color.FromArgb(intIntensity, color)), new Rectangle(new Point(x, y), new Size(1, 1)));
-            //WritePixel(x, y, intensity);
-        }
-
-        public Point MPoint1 { get; set; }
-        public Point MPoint2 { get; set; }
-    }
-
-    public class CustomEllipse : CustomShape
-    {
-        public CustomEllipse(Point p)
-        {
-            MPoint = p;
-        }
-
-        public override void Draw(Graphics graphics, Color color, int thickness)
-        {
-            graphics.FillEllipse(new SolidBrush(color), new Rectangle(new Point(MPoint.X - 5, MPoint.Y - 5), new Size(10, 10)));
-        }
-        public Point MPoint { get; set; }
-    }
-
-    public static class Prompt
-    {
-        public static string ShowDialog(string text, string caption)
-        {
-            Form prompt = new Form();
-            prompt.StartPosition = FormStartPosition.CenterScreen;
-            prompt.Width = 300;
-            prompt.Height = 150;
-            prompt.Text = caption;
-            Label textLabel = new Label() { Left = 20, Top = 10, Height = 35, Width = 260, Text = text };
-            TextBox textBox = new TextBox() { Left = 10, Top = 50, Width = 270 };
-            Button confirmation = new Button() { Text = "OK", Left = 125, Width = 50, Top = 75 };
-            confirmation.Click += (sender, e) => { prompt.Close(); };
-            prompt.Controls.Add(confirmation);
-            prompt.Controls.Add(textLabel);
-            prompt.Controls.Add(textBox);
-            prompt.ShowDialog();
-            return textBox.Text;
-        }
-    }
-    #endregion
 }
