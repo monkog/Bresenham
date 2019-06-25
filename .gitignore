@@ -39,3 +39,4 @@ Icon
 *.suo
 bin/
 obj/
+.vs/

@@ -4,10 +4,10 @@ using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using WindowsFormsApplication1.Helpers;
-using WindowsFormsApplication1.Shapes;
+using SimplePaint.Helpers;
+using SimplePaint.Shapes;
 
-namespace WindowsFormsApplication1
+namespace SimplePaint
 {
     public partial class FigureDesigner : Form
     {

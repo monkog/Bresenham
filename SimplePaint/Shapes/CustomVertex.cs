@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace WindowsFormsApplication1.Shapes
+namespace SimplePaint.Shapes
 {
     public class CustomVertex
     {

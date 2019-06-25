@@ -1,22 +1,17 @@
 ﻿using System.Drawing;
 
-namespace WindowsFormsApplication1.Shapes
+namespace SimplePaint.Shapes
 {
     /// <summary>
     /// Ellipse representing the vertex
     /// </summary>
     public class CustomEllipse : IShape
     {
-        #region Public Properties
         /// <summary>
         /// Gets or sets the position of the ellipse.
         /// </summary>
-        /// <value>
-        /// The position of the ellipse.
-        /// </value>
         public Point Position { get; set; }
-        #endregion Public Properties
-        #region .ctor
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CustomEllipse"/> class.
         /// </summary>
@@ -25,20 +20,13 @@ namespace WindowsFormsApplication1.Shapes
         {
             Position = position;
         }
-        #endregion .ctor
-        #region IShape
-        /// <summary>
-        /// Draws the ellipse.
-        /// </summary>
-        /// <param name="graphics">The graphics.</param>
-        /// <param name="color">The color.</param>
-        /// <param name="size">The size of ellipse.</param>
+
+        /// <inheritdoc/>
         public void Draw(Graphics graphics, Color color, int size)
         {
-            size = size + 6;
-            int delta = size / 2;
+            size += 6;
+            var delta = size / 2;
             graphics.FillEllipse(new SolidBrush(color), new Rectangle(new Point(Position.X - delta, Position.Y - delta), new Size(size, size)));
         }
-        #endregion IShape
     }
 }

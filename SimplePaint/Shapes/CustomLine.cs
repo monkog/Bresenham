@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 
-namespace WindowsFormsApplication1.Shapes
+namespace SimplePaint.Shapes
 {
     /// <summary>
     /// Represents a line

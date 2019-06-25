@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 
-namespace WindowsFormsApplication1.Shapes
+namespace SimplePaint.Shapes
 {
     /// <summary>
     /// Represents a figure composed of lines and ellipses

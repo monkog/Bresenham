@@ -1,6 +1,6 @@
 ﻿using System.Windows.Forms;
 
-namespace WindowsFormsApplication1.Helpers
+namespace SimplePaint.Helpers
 {
     /// <summary>
     /// Shows a dialog window with the specified caption
