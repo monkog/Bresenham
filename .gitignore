@@ -40,3 +40,4 @@ Icon
 bin/
 obj/
 .vs/
+packages/
