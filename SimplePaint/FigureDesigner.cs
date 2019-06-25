@@ -80,7 +80,7 @@ namespace SimplePaint
         /// <summary>
         /// The selected vertex
         /// </summary>
-        private CustomVertex _selectedVertex;
+        private CustomEllipse _selectedVertex;
         /// <summary>
         /// Is the user changing thickness
         /// </summary>
@@ -216,7 +216,7 @@ namespace SimplePaint
             {
                 if (_currentFigure.FigureShapes.Last().GetType() == typeof(CustomLine))
                     _currentFigure.FigureShapes.Remove(_currentFigure.FigureShapes.Last());
-                _currentFigure.FigureShapes.AddLast(new CustomLine(_currentFigure.LastVertex.Point, new Point(e.X, e.Y)));
+                _currentFigure.FigureShapes.AddLast(new CustomLine(_currentFigure.LastVertex.Position, new Point(e.X, e.Y)));
             }
 
             drawingArea.Refresh();
@@ -238,7 +238,7 @@ namespace SimplePaint
             // Add vertex to existing figure.
             if (!_doDrawFigure && _doAddVertex && _figures.Count != 0 && IsPointOnBorder(_mouseUpPosition, out figure, out line))
             {
-                figure.AddInbetweenVertex(new CustomVertex(_mouseUpPosition), line);
+                figure.AddInbetweenVertex(new CustomEllipse(_mouseUpPosition), line);
                 drawingArea.Refresh();
                 return;
             }
@@ -489,9 +489,9 @@ namespace SimplePaint
         /// <returns>True if the figure is closed, otherwise false</returns>
         private bool IsFigureComplete(Point point)
         {
-            CustomVertex vertex = _currentFigure.FirstVertex;
+            var vertex = _currentFigure.FirstVertex;
 
-            return (Math.Abs(point.X - vertex.Point.X) < 10 && Math.Abs(point.Y - vertex.Point.Y) < 10);
+            return (Math.Abs(point.X - vertex.Position.X) < 10 && Math.Abs(point.Y - vertex.Position.Y) < 10);
         }
         /// <summary>
         /// Determines whether [is point on border].
@@ -554,7 +554,7 @@ namespace SimplePaint
         /// <returns>True if such a figure exists, false otherwise</returns>
         private bool SelectFigureToMove(Point location)
         {
-            CustomVertex vertex;
+	        CustomEllipse vertex;
             foreach (CustomFigure figure in _figures)
                 if (CustomFigure.IsVertex(location, figure, out vertex))
                 {
@@ -609,7 +609,7 @@ namespace SimplePaint
             }
             else if (!_doChangeColor && !_doChangeThickness)
             {
-                CustomVertex outVertex;
+                CustomEllipse outVertex;
                 if (_figures.Any(figure => CustomFigure.IsVertex(location, figure, out outVertex)))
                 {
                     Cursor = _handCursor;
@@ -674,8 +674,8 @@ namespace SimplePaint
                     _isFirstVertex = true;
                     _figures.Add(_currentFigure);
                     _currentFigure.FigureShapes.Remove(_currentFigure.FigureShapes.Last());
-                    _currentFigure.FigureShapes.AddLast(new CustomLine(_currentFigure.LastVertex.Point,
-                        _currentFigure.FirstVertex.Point));
+                    _currentFigure.FigureShapes.AddLast(new CustomLine(_currentFigure.LastVertex.Position,
+                        _currentFigure.FirstVertex.Position));
                     drawingArea.Refresh();
 
                     _currentFigure = null;
@@ -699,10 +699,10 @@ namespace SimplePaint
             int deltaY = _mouseLastPosition.Y - y;
 
             // Prevent draging the figure outside the drawing area, so that it won't loose it's vertices and edges.
-            if (_selectedVertex.Point.X - deltaX > drawingArea.Bounds.Width - 10
-                || _selectedVertex.Point.Y - deltaY > drawingArea.Bounds.Height - 10
-                || _selectedVertex.Point.X - deltaX < 5
-                || _selectedVertex.Point.Y - deltaY < 5)
+            if (_selectedVertex.Position.X - deltaX > drawingArea.Bounds.Width - 10
+                || _selectedVertex.Position.Y - deltaY > drawingArea.Bounds.Height - 10
+                || _selectedVertex.Position.X - deltaX < 5
+                || _selectedVertex.Position.Y - deltaY < 5)
                 return true;
 
             Cursor = _handCursor;
@@ -712,14 +712,14 @@ namespace SimplePaint
                 where shape.GetType() == typeof(CustomEllipse)
                 select shape as CustomEllipse)
             {
-                if (ellipse.Position != _selectedVertex.Point) continue;
+                if (ellipse.Position != _selectedVertex.Position) continue;
 
                 var node = _selectedFigure.FigureShapes.Find(ellipse);
 
                 SetLinePosition(node, deltaX, deltaY);
                 ellipse.Position = new Point(ellipse.Position.X - deltaX, ellipse.Position.Y - deltaY);
-                _selectedFigure.FigureVertices.Find(_selectedVertex).Value.Point =
-                    new Point(_selectedVertex.Point.X - deltaX, _selectedVertex.Point.Y - deltaY);
+                _selectedFigure.FigureVertices.Find(_selectedVertex).Value.Position =
+                    new Point(_selectedVertex.Position.X - deltaX, _selectedVertex.Position.Y - deltaY);
 
                 drawingArea.Refresh();
                 SetFigureBounds();
@@ -771,10 +771,10 @@ namespace SimplePaint
 
             foreach (var vertex in _selectedFigure.FigureVertices)
             {
-                if (vertex.Point.X < _selectedFigure.MinX) _selectedFigure.MinX = vertex.Point.X;
-                if (vertex.Point.Y < _selectedFigure.MinY) _selectedFigure.MinY = vertex.Point.Y;
-                if (vertex.Point.X > _selectedFigure.MaxX) _selectedFigure.MaxX = vertex.Point.X;
-                if (vertex.Point.Y > _selectedFigure.MaxY) _selectedFigure.MaxY = vertex.Point.Y;
+                if (vertex.Position.X < _selectedFigure.MinX) _selectedFigure.MinX = vertex.Position.X;
+                if (vertex.Position.Y < _selectedFigure.MinY) _selectedFigure.MinY = vertex.Position.Y;
+                if (vertex.Position.X > _selectedFigure.MaxX) _selectedFigure.MaxX = vertex.Position.X;
+                if (vertex.Position.Y > _selectedFigure.MaxY) _selectedFigure.MaxY = vertex.Position.Y;
             }
         }
         /// <summary>
@@ -809,8 +809,8 @@ namespace SimplePaint
                     line.EndPoint = new Point(line.EndPoint.X - deltaX, line.EndPoint.Y - deltaY);
                 }
 
-            foreach (CustomVertex vertex in _selectedFigure.FigureVertices)
-                vertex.Point = new Point(vertex.Point.X - deltaX, vertex.Point.Y - deltaY);
+            foreach (CustomEllipse vertex in _selectedFigure.FigureVertices)
+                vertex.Position = new Point(vertex.Position.X - deltaX, vertex.Position.Y - deltaY);
 
             _selectedFigure.MaxX -= deltaX;
             _selectedFigure.MinX -= deltaX;
