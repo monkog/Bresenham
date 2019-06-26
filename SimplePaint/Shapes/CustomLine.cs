@@ -8,6 +8,8 @@ namespace SimplePaint.Shapes
 	/// </summary>
 	public class CustomLine : IShape
 	{
+		private static readonly Size PixelSize = new Size(1, 1);
+
 		/// <summary>
 		/// Gets or sets the start point.
 		/// </summary>
@@ -39,8 +41,8 @@ namespace SimplePaint.Shapes
 		/// <param name="thickness">The thickness of the line.</param>
 		private void SymmetricBresenham(Graphics graphics, Color color, int thickness)
 		{
-			var upPixels = (thickness - 1) / 2;
-			var downPixels = thickness - 1 - upPixels;
+			var upPixels = thickness / 2;
+			var downPixels = thickness - upPixels;
 
 			var x1 = StartPoint.X;
 			var x2 = EndPoint.X;
@@ -89,6 +91,7 @@ namespace SimplePaint.Shapes
 			var incrE = 2 * dy;
 			var incrNe = 2 * (dy - dx);
 			var d = 2 * dy - dx;
+			var brush = new SolidBrush(color);
 
 			while (xf != xb && xf - 1 != xb && xf + 1 != xb)
 			{
@@ -104,9 +107,9 @@ namespace SimplePaint.Shapes
 				}
 
 				if (isHorizontal)
-					DrawLineSegment(graphics, xf, yf, xb, yb, upPixels, downPixels, color, isHorizontal);
+					DrawLineSegment(graphics, xf, yf, xb, yb, upPixels, downPixels, brush, isHorizontal);
 				else
-					DrawLineSegment(graphics, yf, xf, yb, xb, upPixels, downPixels, color, isHorizontal);
+					DrawLineSegment(graphics, yf, xf, yb, xb, upPixels, downPixels, brush, isHorizontal);
 			}
 		}
 
@@ -120,26 +123,22 @@ namespace SimplePaint.Shapes
 		/// <param name="y2">The y coordinate of the end point.</param>
 		/// <param name="upPixels">Number of pixels to copy above the line.</param>
 		/// <param name="downPixels">Number of pixels to copy below the line.</param>
-		/// <param name="color">The color.</param>
+		/// <param name="brush">The brush.</param>
 		/// <param name="isLineHorizontal">Is the line's steapness less than 45 deg</param>
 		private static void DrawLineSegment(Graphics graphics, int x1, int y1, int x2, int y2
-			, int upPixels, int downPixels, Color color, bool isLineHorizontal)
+			, int upPixels, int downPixels, Brush brush, bool isLineHorizontal)
 		{
 			var horizontalMultiplier = isLineHorizontal ? 1 : 0;
 			var verticalMultiplier = 1 - horizontalMultiplier;
 			for (var i = 0; i <= upPixels; i++)
 			{
-				graphics.FillRectangle(new SolidBrush(color), new Rectangle(new Point(
-					x1 + i * horizontalMultiplier, y1 + i * verticalMultiplier), new Size(1, 1)));
-				graphics.FillRectangle(new SolidBrush(color), new Rectangle(new Point(
-					x2 + i * horizontalMultiplier, y2 + i * verticalMultiplier), new Size(1, 1)));
+				graphics.FillRectangle(brush, new Rectangle(new Point(x1 + i * horizontalMultiplier, y1 + i * verticalMultiplier), PixelSize));
+				graphics.FillRectangle(brush, new Rectangle(new Point(x2 + i * horizontalMultiplier, y2 + i * verticalMultiplier), PixelSize));
 			}
 			for (var i = 0; i <= downPixels; i++)
 			{
-				graphics.FillRectangle(new SolidBrush(color), new Rectangle(new Point(
-					x1 - i * horizontalMultiplier, y1 - i * verticalMultiplier), new Size(1, 1)));
-				graphics.FillRectangle(new SolidBrush(color), new Rectangle(new Point(
-					x2 - i * horizontalMultiplier, y2 - i * verticalMultiplier), new Size(1, 1)));
+				graphics.FillRectangle(brush, new Rectangle(new Point(x1 - i * horizontalMultiplier, y1 - i * verticalMultiplier), PixelSize));
+				graphics.FillRectangle(brush, new Rectangle(new Point(x2 - i * horizontalMultiplier, y2 - i * verticalMultiplier), PixelSize));
 			}
 		}
 
@@ -169,7 +168,7 @@ namespace SimplePaint.Shapes
 							if (bmp.GetPixel(k, l) == Color.Blue)
 								alpha++;
 					alpha /= 4;
-					graphics.FillRectangle(new SolidBrush(Color.FromArgb((int)(alpha * 255), color)), new Rectangle(point, new Size(1, 1)));
+					graphics.FillRectangle(new SolidBrush(Color.FromArgb((int)(alpha * 255), color)), new Rectangle(point, PixelSize));
 				}
 		}
 
@@ -177,7 +176,7 @@ namespace SimplePaint.Shapes
 		{
 			var intensity = Math.Round(Math.Abs(distance));
 			var intIntensity = (int)(intensity * 255);
-			graphics.FillRectangle(new SolidBrush(Color.FromArgb(intIntensity, color)), new Rectangle(new Point(x, y), new Size(1, 1)));
+			graphics.FillRectangle(new SolidBrush(Color.FromArgb(intIntensity, color)), new Rectangle(new Point(x, y), PixelSize));
 			//WritePixel(x, y, intensity);
 		}
 	}
