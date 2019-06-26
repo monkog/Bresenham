@@ -45,19 +45,27 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EnterValueWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EnterValueWindow.Designer.cs">
+      <DependentUpon>EnterValueWindow.cs</DependentUpon>
+    </Compile>
     <Compile Include="FigureDesigner.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="FigureDesigner.Designer.cs">
       <DependentUpon>FigureDesigner.cs</DependentUpon>
     </Compile>
-    <Compile Include="Helpers\PromptWindow.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Shapes\CustomEllipse.cs" />
     <Compile Include="Shapes\CustomFigure.cs" />
     <Compile Include="Shapes\CustomLine.cs" />
     <Compile Include="Shapes\IShape.cs" />
+    <EmbeddedResource Include="EnterValueWindow.resx">
+      <DependentUpon>EnterValueWindow.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FigureDesigner.resx">
       <DependentUpon>FigureDesigner.cs</DependentUpon>
     </EmbeddedResource>

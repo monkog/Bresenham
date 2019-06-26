@@ -101,6 +101,15 @@ namespace SimplePaint.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid argument!.
+        /// </summary>
+        internal static string InvalidArgument {
+            get {
+                return ResourceManager.GetString("InvalidArgument", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
         internal static byte[] Move {
@@ -117,6 +126,15 @@ namespace SimplePaint.Properties {
             get {
                 object obj = ResourceManager.GetObject("Pen", resourceCulture);
                 return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Value must be in range 1 - 10.
+        /// </summary>
+        internal static string ValueMustBeInRange {
+            get {
+                return ResourceManager.GetString("ValueMustBeInRange", resourceCulture);
             }
         }
     }

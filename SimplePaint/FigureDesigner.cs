@@ -4,7 +4,6 @@ using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using SimplePaint.Helpers;
 using SimplePaint.Shapes;
 
 namespace SimplePaint
@@ -360,21 +359,15 @@ namespace SimplePaint
                 return;
             }
 
-            string result = PromptWindow.ShowDialog("Determine the thickness of line. For best results use value lower than 10 px.", "Choose line thickness");
-            int size;
-
-            if (!int.TryParse(result, out size) || size < 0 || size > 10)
-            {
-                MessageBox.Show("Invalid argument!", "Don't do that!", MessageBoxButtons.OK);
-                return;
-            }
+            var enterValueWindow = new EnterValueWindow();
+			enterValueWindow.ShowDialog();
 
             if (!_doDrawFigure)
                 SetButtonStates(addVertex: false, drawFigure: false, changeColor: false
                     , changeThickness: true, doMultisampling: false);
 
-            _strokeThickness = size;
-            sizeLabel.Text = "CURRENT SIZE: " + size + " px";
+            _strokeThickness = enterValueWindow.LineThickness;
+            sizeLabel.Text = "CURRENT SIZE: " + enterValueWindow.LineThickness + " px";
         }
         /// <summary>
         /// Handles the Click event of the multisamplingButton control.

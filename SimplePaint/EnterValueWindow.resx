@@ -117,29 +117,4 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="BigDot" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\BigDot.cur;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="Bucket" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Bucket.cur;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="Dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Dot.cur;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="Hand" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Hand.cur;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="InvalidArgument" xml:space="preserve">
-    <value>Invalid argument!</value>
-  </data>
-  <data name="Move" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Move.cur;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="Pen" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Pen.cur;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="ValueMustBeInRange" xml:space="preserve">
-    <value>Value must be in range 1 - 10</value>
-  </data>
 </root>
