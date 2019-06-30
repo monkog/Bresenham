@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 
@@ -231,6 +232,31 @@ namespace SimplePaint.Shapes
 				vertex.Position = new Point(vertex.Position.X + deltaX, vertex.Position.Y + deltaY);
 
 			UpdateBoundingBox();
+		}
+
+		/// <summary>
+		/// Moves the vertex by the given delta.
+		/// </summary>
+		/// <param name="deltaX">Change in X coordinate.</param>
+		/// <param name="deltaY">Change in Y coordinate.</param>
+		public void MoveSelectedVertex(int deltaX, int deltaY)
+		{
+			var vertexNode = FigureShapes.First(v => v is CustomEllipse e && e.Position == SelectedVertex.Position);
+			var vertex = FigureShapes.Find(vertexNode);
+			UpdateLinesPositions(vertex, deltaX, deltaY);
+			(vertex.Value as CustomEllipse).Position = new Point(SelectedVertex.Position.X + deltaX, SelectedVertex.Position.Y + deltaY);
+			SelectedVertex.Position = new Point(SelectedVertex.Position.X + deltaX, SelectedVertex.Position.Y + deltaY);
+
+			UpdateBoundingBox();
+		}
+
+		private void UpdateLinesPositions(LinkedListNode<IShape> node, int deltaX, int deltaY)
+		{
+			var previousLine = node.Previous?.Value as CustomLine ?? FigureShapes.Last.Value as CustomLine;
+			previousLine.EndPoint = new Point(previousLine.EndPoint.X + deltaX, previousLine.EndPoint.Y + deltaY);
+
+			var nextLine = node.Next?.Value as CustomLine ?? FigureShapes.First.Value as CustomLine;
+			nextLine.StartPoint = new Point(nextLine.StartPoint.X + deltaX, nextLine.StartPoint.Y + deltaY);
 		}
 
 		private void UpdateBoundingBox()

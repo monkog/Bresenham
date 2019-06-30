@@ -163,7 +163,7 @@ namespace SimplePaint
 				Cursor = Cursors.Cross;
 
 			if (_shapeManager.SelectedFigure == null && !_doDrawFigure && !_doAddVertex && SetCursorImage(e.Location)) return;
-			if (_shapeManager.SelectedFigure != null && _shapeManager.SelectedFigure.Vertices.Any(v => v.IsSelected) && MoveVertex(e.X, e.Y, e.Location)) return;
+			if (_shapeManager.SelectedFigure != null && _shapeManager.SelectedFigure.Vertices.Any(v => v.IsSelected) && MoveVertex(e.Location)) return;
 			if (_shapeManager.SelectedFigure != null && !MoveFigure(e.Location)) return;
 
 			// Proceed when drawing current figure is in progress. 
@@ -562,97 +562,25 @@ namespace SimplePaint
 		/// <summary>
 		/// Move the vertex in the bounds of drawingArea.
 		/// </summary>
-		/// <param name="x">The x.</param>
-		/// <param name="y">The y.</param>
-		/// <param name="location">The location.</param>
+		/// <param name="point">The mouse position.</param>
 		/// <returns>True if there was a vertex to move and it was moved, false otherwise</returns>
-		private bool MoveVertex(int x, int y, Point location)
+		private bool MoveVertex(Point point)
 		{
-			int deltaX = _mouseLastPosition.X - x;
-			int deltaY = _mouseLastPosition.Y - y;
+			var deltaX = point.X - _mouseLastPosition.X;
+			var deltaY = point.Y - _mouseLastPosition.Y;
 
-			var vertex = _shapeManager.SelectedFigure.SelectedVertex;
-
-			// Prevent draging the figure outside the drawing area, so that it won't loose it's vertices and edges.
-			if (vertex.Position.X - deltaX > drawingArea.Bounds.Width - 10
-				|| vertex.Position.Y - deltaY > drawingArea.Bounds.Height - 10
-				|| vertex.Position.X - deltaX < 5
-				|| vertex.Position.Y - deltaY < 5)
-				return true;
+			var selectedFigure = _shapeManager.SelectedFigure;
+			var vertex = selectedFigure.SelectedVertex;
+			if (CanDragVertex(deltaX, deltaY)) return true;
 
 			Cursor = Cursors.Hand;
+			selectedFigure.MoveSelectedVertex(deltaX, deltaY);
+			drawingArea.Refresh();
 
-			foreach (CustomEllipse ellipse in
-				from shape in _shapeManager.SelectedFigure.FigureShapes
-				where shape.GetType() == typeof(CustomEllipse)
-				select shape as CustomEllipse)
-			{
-				if (ellipse.Position != vertex.Position) continue;
-
-				var node = _shapeManager.SelectedFigure.FigureShapes.Find(ellipse);
-
-				SetLinePosition(node, deltaX, deltaY);
-				ellipse.Position = new Point(ellipse.Position.X - deltaX, ellipse.Position.Y - deltaY);
-				_shapeManager.SelectedFigure.Vertices.Find(vertex).Value.Position =
-					new Point(vertex.Position.X - deltaX, vertex.Position.Y - deltaY);
-
-				drawingArea.Refresh();
-				SetFigureBounds();
-
-				_mouseLastPosition = location;
-				return true;
-			}
+			_mouseLastPosition = point;
 			return false;
 		}
-		/// <summary>
-		/// Sets the line position.
-		/// </summary>
-		/// <param name="node">The node.</param>
-		/// <param name="deltaX">The delta x.</param>
-		/// <param name="deltaY">The delta y.</param>
-		private void SetLinePosition(LinkedListNode<IShape> node, int deltaX, int deltaY)
-		{
-			try
-			{
-				CustomLine line = node.Previous.Value as CustomLine;
-				line.EndPoint = new Point(line.EndPoint.X - deltaX, line.EndPoint.Y - deltaY);
-			}
-			catch (Exception)
-			{
-				CustomLine line = _shapeManager.SelectedFigure.FigureShapes.Last.Value as CustomLine;
-				line.EndPoint = new Point(line.EndPoint.X - deltaX, line.EndPoint.Y - deltaY);
-			}
-
-			try
-			{
-				CustomLine line = node.Next.Value as CustomLine;
-				line.StartPoint = new Point(line.StartPoint.X - deltaX, line.StartPoint.Y - deltaY);
-			}
-			catch (Exception)
-			{
-				CustomLine line = _shapeManager.SelectedFigure.FigureShapes.First.Value as CustomLine;
-				line.StartPoint = new Point(line.StartPoint.X - deltaX, line.StartPoint.Y - deltaY);
-			}
-		}
-		/// <summary>
-		/// Sets the figure's bounds.
-		/// </summary>
-		private void SetFigureBounds()
-		{
-			_shapeManager.SelectedFigure.MaxX = int.MinValue;
-			_shapeManager.SelectedFigure.MaxY = int.MinValue;
-			_shapeManager.SelectedFigure.MinX = int.MaxValue;
-			_shapeManager.SelectedFigure.MinY = int.MaxValue;
-
-			foreach (var vertex in _shapeManager.SelectedFigure.Vertices)
-			{
-				if (vertex.Position.X < _shapeManager.SelectedFigure.MinX) _shapeManager.SelectedFigure.MinX = vertex.Position.X;
-				if (vertex.Position.Y < _shapeManager.SelectedFigure.MinY) _shapeManager.SelectedFigure.MinY = vertex.Position.Y;
-				if (vertex.Position.X > _shapeManager.SelectedFigure.MaxX) _shapeManager.SelectedFigure.MaxX = vertex.Position.X;
-				if (vertex.Position.Y > _shapeManager.SelectedFigure.MaxY) _shapeManager.SelectedFigure.MaxY = vertex.Position.Y;
-			}
-		}
-
+		
 		private bool MoveFigure(Point point)
 		{
 			var deltaX = point.X - _mouseLastPosition.X;
@@ -667,12 +595,22 @@ namespace SimplePaint
 			return true;
 		}
 
+		private bool CanDragVertex(int deltaX, int deltaY)
+		{
+			var vertex = _shapeManager.SelectedFigure.SelectedVertex;
+			return vertex.Position.X - deltaX > drawingArea.Bounds.Width - Delta
+			       || vertex.Position.Y - deltaY > drawingArea.Bounds.Height - Delta
+				   || vertex.Position.X - deltaX < Delta
+				   || vertex.Position.Y - deltaY < Delta;
+		}
+
 		private bool CanDragFigure(int deltaX, int deltaY)
 		{
-			return _shapeManager.SelectedFigure.MaxX + deltaX > drawingArea.Bounds.Width - Delta
-				   || _shapeManager.SelectedFigure.MinX + deltaX < Delta
-				   || _shapeManager.SelectedFigure.MaxY + deltaY > drawingArea.Bounds.Height - Delta
-				   || _shapeManager.SelectedFigure.MinY + deltaY < Delta;
+			var selectedFigure = _shapeManager.SelectedFigure;
+			return selectedFigure.MaxX + deltaX > drawingArea.Bounds.Width - Delta
+				   || selectedFigure.MinX + deltaX < Delta
+				   || selectedFigure.MaxY + deltaY > drawingArea.Bounds.Height - Delta
+				   || selectedFigure.MinY + deltaY < Delta;
 		}
 
 		#endregion Private Methods

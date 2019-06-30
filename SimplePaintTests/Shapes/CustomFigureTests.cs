@@ -166,6 +166,12 @@ namespace SimplePaintTests.Shapes
 		}
 
 		[TestMethod]
+		public void MoveVertex_Delta_LinesUpdated()
+		{
+			Assert.Fail();
+		}
+
+		[TestMethod]
 		public void Select_NoParams_Selected()
 		{
 			_unitUnderTest.Select();
