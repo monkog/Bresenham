@@ -124,16 +124,8 @@ namespace SimplePaint
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void FigureDesigner_Load(object sender, EventArgs e)
         {
-            // Window state.
-            WindowState = FormWindowState.Maximized;
-            BackColor = Color.SaddleBrown;
-
             InitializeDefaultValues();
-            SetupLayout();
             SetDefaultSettings();
-
-            // Functionality.
-            drawingArea.Paint += drawingArea_Paint;
 
             LoadCursorImages();
             drawFigureButton.PerformClick();
@@ -440,30 +432,12 @@ namespace SimplePaint
                 Console.WriteLine("Could not load cursors.");
             }
         }
-        /// <summary>
-        /// Setups the layout.
-        /// </summary>
-        private void SetupLayout()
-        {
-            buttonsPanel.BackColor = Color.Bisque;
-            buttonsPanel.BorderStyle = BorderStyle.Fixed3D;
-
-            drawingArea.BackColor = Color.Bisque;
-            drawingArea.BorderStyle = BorderStyle.Fixed3D;
-
-            colorLabel.BackColor = Color.Bisque;
-            sizeLabel.BackColor = Color.Bisque;
-
-            colorPictureBox.BackColor = _color;
-            colorPictureBox.BorderStyle = BorderStyle.Fixed3D;
-        }
-        /// <summary>
-        /// Initializes the default values for local variables.
-        /// </summary>
+		
         private void InitializeDefaultValues()
         {
             _color = Color.Red;
-            _strokeThickness = 2;
+            colorPictureBox.BackColor = _color;
+			_strokeThickness = 2;
             _figures = new List<CustomFigure>();
 
             _mouseDownPosition = Point.Empty;
