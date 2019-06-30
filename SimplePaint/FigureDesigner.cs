@@ -9,6 +9,8 @@ namespace SimplePaint
 {
 	public partial class FigureDesigner : Form
 	{
+		private const int Delta = 10;
+
 		private readonly ShapeManager _shapeManager = new ShapeManager();
 
 		private readonly CursorManager _cursorManager = new CursorManager();
@@ -165,7 +167,7 @@ namespace SimplePaint
 
 			if (_shapeManager.SelectedFigure == null && !_doDrawFigure && !_doAddVertex && SetCursorImage(e.Location)) return;
 			if (_selectedVertex != null && MoveVertex(e.X, e.Y, e.Location)) return;
-			if (_shapeManager.SelectedFigure != null && MoveFigure(e.X, e.Y, e.Location)) return;
+			if (_shapeManager.SelectedFigure != null && !MoveFigure(e.Location)) return;
 
 			// Proceed when drawing current figure is in progress. 
 			// Draws a temporary line between the last vertex and current mouse position.
@@ -653,50 +655,29 @@ namespace SimplePaint
 				if (vertex.Position.Y > _shapeManager.SelectedFigure.MaxY) _shapeManager.SelectedFigure.MaxY = vertex.Position.Y;
 			}
 		}
-		/// <summary>
-		/// Move the figure between the bounds of the drawingArea.
-		/// </summary>
-		/// <param name="x">The x.</param>
-		/// <param name="y">The y.</param>
-		/// <param name="location">The location.</param>
-		/// <returns>True if the figure was moved</returns>
-		private bool MoveFigure(int x, int y, Point location)
+
+		private bool MoveFigure(Point point)
 		{
-			int deltaX = _mouseLastPosition.X - x;
-			int deltaY = _mouseLastPosition.Y - y;
+			var deltaX = point.X - _mouseLastPosition.X;
+			var deltaY = point.Y - _mouseLastPosition.Y;
 
-			// Prevent draging the figure outside the drawing area, so that it won't loose it's vertices and edges.
-			if (_shapeManager.SelectedFigure.MaxX - deltaX > drawingArea.Bounds.Width - 10
-				|| _shapeManager.SelectedFigure.MaxY - deltaY > drawingArea.Bounds.Height - 10
-				|| _shapeManager.SelectedFigure.MinX - deltaX < 5
-				|| _shapeManager.SelectedFigure.MinY - deltaY < 5)
-				return true;
+			if (CanDragFigure(deltaX, deltaY)) return false;
 
-			foreach (IShape shape in _shapeManager.SelectedFigure.FigureShapes)
-				if (shape.GetType() == typeof(CustomEllipse))
-				{
-					CustomEllipse ellipse = shape as CustomEllipse;
-					ellipse.Position = new Point(ellipse.Position.X - deltaX, ellipse.Position.Y - deltaY);
-				}
-				else
-				{
-					CustomLine line = shape as CustomLine;
-					line.StartPoint = new Point(line.StartPoint.X - deltaX, line.StartPoint.Y - deltaY);
-					line.EndPoint = new Point(line.EndPoint.X - deltaX, line.EndPoint.Y - deltaY);
-				}
+			_shapeManager.SelectedFigure.Move(deltaX, deltaY);
 
-			foreach (CustomEllipse vertex in _shapeManager.SelectedFigure.Vertices)
-				vertex.Position = new Point(vertex.Position.X - deltaX, vertex.Position.Y - deltaY);
-
-			_shapeManager.SelectedFigure.MaxX -= deltaX;
-			_shapeManager.SelectedFigure.MinX -= deltaX;
-			_shapeManager.SelectedFigure.MaxY -= deltaY;
-			_shapeManager.SelectedFigure.MinY -= deltaY;
-
-			_mouseLastPosition = location;
+			_mouseLastPosition = point;
 			Cursor = Cursors.SizeAll;
-			return false;
+			return true;
 		}
+
+		private bool CanDragFigure(int deltaX, int deltaY)
+		{
+			return _shapeManager.SelectedFigure.MaxX + deltaX > drawingArea.Bounds.Width - Delta
+				   || _shapeManager.SelectedFigure.MinX + deltaX < Delta
+				   || _shapeManager.SelectedFigure.MaxY + deltaY > drawingArea.Bounds.Height - Delta
+				   || _shapeManager.SelectedFigure.MinY + deltaY < Delta;
+		}
+
 		#endregion Private Methods
 	}
 }

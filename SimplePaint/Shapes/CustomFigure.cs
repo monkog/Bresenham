@@ -41,7 +41,7 @@ namespace SimplePaint.Shapes
 		/// Gets or sets the stroke thickness.
 		/// </summary>
 		public int StrokeThickness { get; set; }
-		
+
 		/// <summary>
 		/// Gets or sets the maximum x coordinate of the figure.
 		/// </summary>
@@ -97,7 +97,7 @@ namespace SimplePaint.Shapes
 			FigureShapes.AddFirst(new CustomEllipse(point));
 			MultisamplingLine = null;
 			MultisamplingColor = Color.Azure;
-			UpdateBoundingBox(point);
+			UpdateBoundingBox();
 		}
 
 		/// <summary>
@@ -123,7 +123,7 @@ namespace SimplePaint.Shapes
 			FigureShapes.AddAfter(lineStart.Next.Next, new CustomLine(point, nextEllipse.Position));
 
 			Vertices.AddAfter(Vertices.Find(FindVertexAtPoint(previousEllipse.Position)), new CustomEllipse(point));
-			UpdateBoundingBox(point);
+			UpdateBoundingBox();
 		}
 
 		/// <summary>
@@ -137,7 +137,7 @@ namespace SimplePaint.Shapes
 			Vertices.AddLast(new CustomEllipse(point));
 			FigureShapes.AddLast(new CustomEllipse(point));
 
-			UpdateBoundingBox(point);
+			UpdateBoundingBox();
 		}
 
 		/// <summary>
@@ -184,12 +184,34 @@ namespace SimplePaint.Shapes
 			return vertex != null;
 		}
 
-		private void UpdateBoundingBox(Point point)
+		/// <summary>
+		/// Moves the figure by the given delta.
+		/// </summary>
+		/// <param name="deltaX">Change in X coordinate.</param>
+		/// <param name="deltaY">Change in Y coordinate.</param>
+		public void Move(int deltaX, int deltaY)
 		{
-			if (point.X > MaxX) MaxX = point.X;
-			if (point.X < MinX) MinX = point.X;
-			if (point.Y > MaxY) MaxY = point.Y;
-			if (point.Y < MinY) MinY = point.Y;
+			foreach (var vertex in FigureShapes.OfType<CustomEllipse>())
+				vertex.Position = new Point(vertex.Position.X + deltaX, vertex.Position.Y + deltaY);
+
+			foreach (var line in FigureShapes.OfType<CustomLine>())
+			{
+				line.StartPoint = new Point(line.StartPoint.X + deltaX, line.StartPoint.Y + deltaY);
+				line.EndPoint = new Point(line.EndPoint.X + deltaX, line.EndPoint.Y + deltaY);
+			}
+
+			foreach (var vertex in Vertices)
+				vertex.Position = new Point(vertex.Position.X + deltaX, vertex.Position.Y + deltaY);
+
+			UpdateBoundingBox();
+		}
+
+		private void UpdateBoundingBox()
+		{
+			MinX = Vertices.Min(v => v.Position.X);
+			MaxX = Vertices.Max(v => v.Position.X);
+			MinY = Vertices.Min(v => v.Position.Y);
+			MaxY = Vertices.Max(v => v.Position.Y);
 		}
 
 		private bool IsOutsideBoundingBox(Point point)

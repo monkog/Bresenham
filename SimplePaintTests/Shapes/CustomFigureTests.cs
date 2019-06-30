@@ -115,12 +115,54 @@ namespace SimplePaintTests.Shapes
 		[TestMethod]
 		public void AddVertexOnLine_ExistingVertex_VertexNotAdded()
 		{
-			var point = new Point(20,20);
+			var point = new Point(20, 20);
 			var vertexCount = _unitUnderTest.Vertices.Count;
 
 			_unitUnderTest.AddVertexOnLine(point, new CustomLine(point, point));
 
 			Assert.AreEqual(vertexCount, _unitUnderTest.Vertices.Count);
+		}
+
+		[TestMethod]
+		public void Move_Delta_BoundingBoxUpdated()
+		{
+			var minX = _unitUnderTest.MinX;
+			var maxX = _unitUnderTest.MaxX;
+			var minY = _unitUnderTest.MinY;
+			var maxY = _unitUnderTest.MaxY;
+
+			_unitUnderTest.Move(-10, -19);
+
+			Assert.AreNotEqual(minX, _unitUnderTest.MinX);
+			Assert.AreEqual(-30, _unitUnderTest.MinX);
+			Assert.AreNotEqual(maxX, _unitUnderTest.MaxX);
+			Assert.AreEqual(10, _unitUnderTest.MaxX);
+			Assert.AreNotEqual(minY, _unitUnderTest.MinY);
+			Assert.AreEqual(-39, _unitUnderTest.MinY);
+			Assert.AreNotEqual(maxY, _unitUnderTest.MaxY);
+			Assert.AreEqual(1, _unitUnderTest.MaxY);
+		}
+
+		[TestMethod]
+		public void Move_Delta_VerticesUpdated()
+		{
+			var firstVertex = new Point(0, 0);
+			var secondVertex = new Point(10, 10);
+
+			var unitUnderTest = new CustomFigure(firstVertex, Color.AliceBlue, 1);
+			unitUnderTest.AddVertex(secondVertex);
+
+			unitUnderTest.Move(-10, -19);
+
+			Assert.AreEqual(2, unitUnderTest.Vertices.Count);
+			Assert.AreEqual(1, unitUnderTest.Vertices.Count(v => v.Position.X == -10 && v.Position.Y == -19));
+			Assert.AreEqual(1, unitUnderTest.Vertices.Count(v => v.Position.X == 0 && v.Position.Y == -9));
+		}
+
+		[TestMethod]
+		public void Move_Delta_LinesUpdated()
+		{
+			Assert.Fail();
 		}
 	}
 }
