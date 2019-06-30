@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using SimplePaint.Shapes;
 
@@ -10,26 +9,16 @@ namespace SimplePaint
 {
 	public partial class FigureDesigner : Form
 	{
-		#region Extern Imports
-		/// <summary>
-		/// Used for importing cursor images
-		/// </summary>
-		[DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-		internal static extern IntPtr LoadImage(IntPtr hinst, string lpszName, uint uType
-			, int cxDesired, int cyDesired, uint fuLoad);
-		#endregion Extern Imports
-		#region .ctor
-		/// <summary>
-		/// Initializes the window instance
-		/// </summary>
+		private readonly ShapeManager _shapeManager = new ShapeManager();
+
+		private readonly CursorManager _cursorManager = new CursorManager();
+
 		public FigureDesigner()
 		{
 			InitializeComponent();
 		}
-		#endregion .ctor
-		#region Private Members
 
-		private readonly ShapeManager _shapeManager = new ShapeManager();
+		#region Private Members
 
 		/// <summary>
 		/// Is this the first vertex
@@ -81,22 +70,6 @@ namespace SimplePaint
 		/// </summary>
 		private bool _doChangeThickness;
 		/// <summary>
-		/// The bucket cursor
-		/// </summary>
-		private Cursor _bucketCursor;
-		/// <summary>
-		/// The dot cursor
-		/// </summary>
-		private Cursor _dotCursor;
-		/// <summary>
-		/// The pen cursor
-		/// </summary>
-		private Cursor _penCursor;
-		/// <summary>
-		/// The hand cursor
-		/// </summary>
-		private Cursor _handCursor;
-		/// <summary>
 		/// The selected line
 		/// </summary>
 		private CustomLine _selectedLine;
@@ -123,7 +96,6 @@ namespace SimplePaint
 			InitializeDefaultValues();
 			SetDefaultSettings();
 
-			LoadCursorImages();
 			drawFigureButton.PerformClick();
 		}
 		/// <summary>
@@ -193,7 +165,7 @@ namespace SimplePaint
 			Cursor = Cursors.Default;
 
 			if (_doAddVertex || _doDrawFigure)
-				Cursor = _dotCursor;
+				Cursor = Cursors.Cross;
 
 			if (_shapeManager.SelectedFigure == null && !_doDrawFigure && !_doAddVertex && SetCursorImage(e.Location)) return;
 			if (_selectedVertex != null && MoveVertex(e.X, e.Y, e.Location)) return;
@@ -258,7 +230,7 @@ namespace SimplePaint
 
 			SetButtonStates(addVertex: false, drawFigure: true, changeColor: false
 				, changeThickness: false, doMultisampling: false);
-			Cursor = _dotCursor;
+			Cursor = Cursors.Cross;
 		}
 		/// <summary>
 		/// Handles the Click event of the addVertexButton control.
@@ -284,7 +256,7 @@ namespace SimplePaint
 			SetButtonStates(addVertex: true, drawFigure: false, changeColor: false
 				, changeThickness: false, doMultisampling: false);
 
-			Cursor = _dotCursor;
+			Cursor = Cursors.Cross;
 		}
 		/// <summary>
 		/// Clears all figures and restores the default settings.
@@ -394,41 +366,6 @@ namespace SimplePaint
 			_shapeManager.Figures.Clear();
 			_currentFigure = null;
 			drawingArea.Refresh();
-		}
-		/// <summary>
-		/// Loads the cursor images.
-		/// </summary>
-		private void LoadCursorImages()
-		{
-			const int imageCursor = 2;
-			const uint lrLoadfromfile = 0x00000010;
-			try
-			{
-				IntPtr ipImage = LoadImage(IntPtr.Zero,
-					@"d:\Studia\Semestr_5\Grafika_Komputerowa_I\Laboratoria\01-Edytor_Grafiki\WindowsFormsApplication1\WindowsFormsApplication1\Bucket.cur ",
-					imageCursor, 0, 0, lrLoadfromfile);
-				_bucketCursor = new Cursor(ipImage);
-
-				ipImage = LoadImage(IntPtr.Zero,
-					@"d:\Studia\Semestr_5\Grafika_Komputerowa_I\Laboratoria\01-Edytor_Grafiki\WindowsFormsApplication1\WindowsFormsApplication1\Dot.cur ",
-					imageCursor, 0, 0, lrLoadfromfile);
-				_dotCursor = new Cursor(ipImage);
-
-				ipImage = LoadImage(IntPtr.Zero,
-					@"d:\Studia\Semestr_5\Grafika_Komputerowa_I\Laboratoria\01-Edytor_Grafiki\WindowsFormsApplication1\WindowsFormsApplication1\Pen.cur ",
-					imageCursor, 0, 0, lrLoadfromfile);
-				_penCursor = new Cursor(ipImage);
-
-				ipImage = LoadImage(IntPtr.Zero,
-					@"d:\Studia\Semestr_5\Grafika_Komputerowa_I\Laboratoria\01-Edytor_Grafiki\WindowsFormsApplication1\WindowsFormsApplication1\Hand.cur ",
-					imageCursor, 0, 0, lrLoadfromfile);
-				_handCursor = new Cursor(ipImage);
-			}
-			catch (Exception)
-			{
-				_bucketCursor = _dotCursor = _penCursor = _handCursor = Cursors.Hand;
-				Console.WriteLine("Could not load cursors.");
-			}
 		}
 
 		private void InitializeDefaultValues()
@@ -548,18 +485,18 @@ namespace SimplePaint
 
 			if (_doChangeColor && IsPointOnBorder(location, out outFigure, out outLine))
 			{
-				Cursor = _bucketCursor;
+				Cursor = _cursorManager.BucketCursor;
 			}
 			else if (_doChangeThickness && _shapeManager.Figures.Any(figure => IsPointOnBorder(location, out outFigure, out outLine)))
 			{
-				Cursor = _penCursor;
+				Cursor = _cursorManager.PenCursor;
 				return true;
 			}
 			else if (!_doChangeColor && !_doChangeThickness)
 			{
 				if (_shapeManager.Figures.Any(figure => figure.IsVertex(location, out _)))
 				{
-					Cursor = _handCursor;
+					Cursor = Cursors.Hand;
 					return true;
 				}
 
@@ -652,7 +589,7 @@ namespace SimplePaint
 				|| _selectedVertex.Position.Y - deltaY < 5)
 				return true;
 
-			Cursor = _handCursor;
+			Cursor = Cursors.Hand;
 
 			foreach (CustomEllipse ellipse in
 				from shape in _shapeManager.SelectedFigure.FigureShapes

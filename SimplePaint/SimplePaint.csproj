@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CursorManager.cs" />
     <Compile Include="EnterValueWindow.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -94,23 +95,12 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <None Include="Resources\Bucket.cur" />
+    <None Include="Resources\bucket.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Dot.cur" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Move.cur" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Pen.cur" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\BigDot.cur" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Hand.cur" />
+    <None Include="Resources\pen.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

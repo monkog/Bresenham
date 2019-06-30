@@ -61,42 +61,12 @@ namespace SimplePaint.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static byte[] BigDot {
+        internal static System.Drawing.Bitmap bucket {
             get {
-                object obj = ResourceManager.GetObject("BigDot", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] Bucket {
-            get {
-                object obj = ResourceManager.GetObject("Bucket", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] Dot {
-            get {
-                object obj = ResourceManager.GetObject("Dot", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] Hand {
-            get {
-                object obj = ResourceManager.GetObject("Hand", resourceCulture);
-                return ((byte[])(obj));
+                object obj = ResourceManager.GetObject("bucket", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
@@ -110,22 +80,12 @@ namespace SimplePaint.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static byte[] Move {
+        internal static System.Drawing.Bitmap pen {
             get {
-                object obj = ResourceManager.GetObject("Move", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] Pen {
-            get {
-                object obj = ResourceManager.GetObject("Pen", resourceCulture);
-                return ((byte[])(obj));
+                object obj = ResourceManager.GetObject("pen", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
