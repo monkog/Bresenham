@@ -28,6 +28,9 @@ namespace SimplePaint
         }
         #endregion .ctor
         #region Private Members
+
+		private readonly ShapeManager _shapeManager = new ShapeManager();
+
         /// <summary>
         /// Is this the first vertex
         /// </summary>
@@ -48,10 +51,6 @@ namespace SimplePaint
         /// Is the user currently adding a vertex
         /// </summary>
         private bool _doAddVertex;
-        /// <summary>
-        /// List of all figures
-        /// </summary>
-        private List<CustomFigure> _figures;
         /// <summary>
         /// The last mouse down position
         /// </summary>
@@ -140,8 +139,8 @@ namespace SimplePaint
             if (_currentFigure != null)
                 foreach (IShape shape in _currentFigure.FigureShapes)
                     shape.Draw(e.Graphics, _currentFigure.FigureColor, _currentFigure.StrokeThickness);
-            if (_figures.Count != 0)
-                foreach (CustomFigure figure in _figures)
+            if (_shapeManager.Figures.Any())
+                foreach (CustomFigure figure in _shapeManager.Figures)
                 {
                     if (_doMultisample && _multisamplingFigure == figure && _selectedLine != null)
                     {
@@ -178,7 +177,7 @@ namespace SimplePaint
 
             if (_doMultisample && SelectLineForMultisampling(e.Location)) return;
 
-            foreach (CustomFigure figure in _figures.Where(figure => CustomFigure.IsPointInFigure(e.Location, figure)))
+            foreach (CustomFigure figure in _shapeManager.Figures.Where(figure => CustomFigure.IsPointInFigure(e.Location, figure)))
             {
                 _selectedFigure = figure;
                 Cursor = Cursors.SizeAll;
@@ -227,7 +226,7 @@ namespace SimplePaint
             CustomLine line;
 
             // Add vertex to existing figure.
-            if (!_doDrawFigure && _doAddVertex && _figures.Count != 0 && IsPointOnBorder(_mouseUpPosition, out figure, out line))
+            if (!_doDrawFigure && _doAddVertex && _shapeManager.Figures.Any() && IsPointOnBorder(_mouseUpPosition, out figure, out line))
             {
                 figure.AddInbetweenVertex(new CustomEllipse(_mouseUpPosition), line);
                 drawingArea.Refresh();
@@ -277,7 +276,7 @@ namespace SimplePaint
                 return;
             }
 
-            if (_figures.Count == 0 || (_doDrawFigure && _currentFigure != null))
+            if (!_shapeManager.Figures.Any() || (_doDrawFigure && _currentFigure != null))
             {
                 MessageBox.Show("You have to finish drawing at least one figure to use this functionality.", "Don't do that!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
@@ -393,7 +392,7 @@ namespace SimplePaint
                 , changeThickness: false, doMultisampling: false);
 
             _isFirstVertex = true;
-            _figures.Clear();
+            _shapeManager.Figures.Clear();
             _currentFigure = null;
             drawingArea.Refresh();
         }
@@ -438,7 +437,6 @@ namespace SimplePaint
             _color = Color.Red;
             colorPictureBox.BackColor = _color;
 			_strokeThickness = 2;
-            _figures = new List<CustomFigure>();
 
             _mouseDownPosition = Point.Empty;
             _mouseUpPosition = Point.Empty;
@@ -472,7 +470,7 @@ namespace SimplePaint
             outFigure = null;
             outLine = null;
 
-            foreach (CustomFigure figure in _figures)
+            foreach (CustomFigure figure in _shapeManager.Figures)
                 foreach (CustomLine line in from shape in figure.FigureShapes
                                             where shape.GetType() == typeof(CustomLine)
                                             select shape as CustomLine)
@@ -522,7 +520,7 @@ namespace SimplePaint
         private bool SelectFigureToMove(Point location)
         {
 	        CustomEllipse vertex;
-            foreach (CustomFigure figure in _figures)
+            foreach (CustomFigure figure in _shapeManager.Figures)
                 if (CustomFigure.IsVertex(location, figure, out vertex))
                 {
                     _selectedFigure = figure;
@@ -541,7 +539,7 @@ namespace SimplePaint
             CustomLine outLine;
             CustomFigure outFigure;
 
-            foreach (CustomFigure figure in _figures)
+            foreach (CustomFigure figure in _shapeManager.Figures)
                 if (IsPointOnBorder(location, out outFigure, out outLine))
                 {
                     if (_multisamplingFigure != null)
@@ -569,7 +567,7 @@ namespace SimplePaint
             {
                 Cursor = _bucketCursor;
             }
-            else if (_doChangeThickness && _figures.Any(figure => IsPointOnBorder(location, out outFigure, out outLine)))
+            else if (_doChangeThickness && _shapeManager.Figures.Any(figure => IsPointOnBorder(location, out outFigure, out outLine)))
             {
                 Cursor = _penCursor;
                 return true;
@@ -577,13 +575,13 @@ namespace SimplePaint
             else if (!_doChangeColor && !_doChangeThickness)
             {
                 CustomEllipse outVertex;
-                if (_figures.Any(figure => CustomFigure.IsVertex(location, figure, out outVertex)))
+                if (_shapeManager.Figures.Any(figure => CustomFigure.IsVertex(location, figure, out outVertex)))
                 {
                     Cursor = _handCursor;
                     return true;
                 }
 
-                if (_figures.Any(figure => CustomFigure.IsPointInFigure(location, figure)))
+                if (_shapeManager.Figures.Any(figure => CustomFigure.IsPointInFigure(location, figure)))
                 {
                     Cursor = Cursors.SizeAll;
                     return true;
@@ -639,7 +637,7 @@ namespace SimplePaint
                     if (_currentFigure.VertexNumber < 3) return true;
 
                     _isFirstVertex = true;
-                    _figures.Add(_currentFigure);
+                    _shapeManager.Figures.Add(_currentFigure);
                     _currentFigure.FigureShapes.Remove(_currentFigure.FigureShapes.Last());
                     _currentFigure.FigureShapes.AddLast(new CustomLine(_currentFigure.LastVertex.Position,
                         _currentFigure.FirstVertex.Position));
