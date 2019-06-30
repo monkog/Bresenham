@@ -80,10 +80,6 @@ namespace SimplePaint.Shapes
 		/// Gets or sets the color of the multi-sampling.
 		/// </summary>
 		public Color MultisamplingColor { get; set; }
-		/// <summary>
-		/// Gets the size of the vertex.
-		/// </summary>
-		public int VertexSize { get; private set; }
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="CustomFigure"/> class.
@@ -95,17 +91,13 @@ namespace SimplePaint.Shapes
 		{
 			FigureColor = color;
 			StrokeThickness = strokeThickness;
-			VertexSize = StrokeThickness + 6;
 			Vertices = new LinkedList<CustomEllipse>();
 			Vertices.AddFirst(new CustomEllipse(point));
 			FigureShapes = new LinkedList<IShape>();
 			FigureShapes.AddFirst(new CustomEllipse(point));
 			MultisamplingLine = null;
 			MultisamplingColor = Color.Azure;
-			MaxX = point.X + 5;
-			MinX = point.X - 5;
-			MaxY = point.Y + 5;
-			MinY = point.Y - 5;
+			UpdateBoundingBox(point);
 		}
 
 		/// <summary>
