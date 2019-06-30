@@ -76,6 +76,11 @@ namespace SimplePaint.Shapes
 		public bool IsSelected { get; private set; }
 
 		/// <summary>
+		/// Gets the selected vertex.
+		/// </summary>
+		public CustomEllipse SelectedVertex => Vertices.SingleOrDefault(f => f.IsSelected);
+
+		/// <summary>
 		/// Gets or sets the multi-sampling line.
 		/// </summary>
 		public CustomLine MultisamplingLine { get; set; }
@@ -202,6 +207,8 @@ namespace SimplePaint.Shapes
 		public void Deselect()
 		{
 			IsSelected = false;
+			foreach (var vertex in Vertices.Where(v => v.IsSelected))
+				vertex.Deselect();
 		}
 
 		/// <summary>

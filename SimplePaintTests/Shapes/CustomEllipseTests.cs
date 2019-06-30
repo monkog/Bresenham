@@ -7,6 +7,14 @@ namespace SimplePaintTests.Shapes
 	[TestClass]
 	public class CustomEllipseTests
 	{
+		private CustomEllipse _unitUnderTest;
+
+		[TestInitialize]
+		public void Initialize()
+		{
+			_unitUnderTest = new CustomEllipse(new Point(2, 5));
+		}
+
 		[TestMethod]
 		public void Ctor_ValidParameters_PropertiesAssigned()
 		{
@@ -15,6 +23,24 @@ namespace SimplePaintTests.Shapes
 			var unitUnderTest = new CustomEllipse(position);
 
 			Assert.AreEqual(position, unitUnderTest.Position);
+		}
+
+		[TestMethod]
+		public void Select_NoParams_FigureSelected()
+		{
+			_unitUnderTest.Select();
+
+			Assert.IsTrue(_unitUnderTest.IsSelected);
+		}
+
+		[TestMethod]
+		public void Deselect_NoParams_SelectedFigureNull()
+		{
+			_unitUnderTest.Select();
+
+			_unitUnderTest.Deselect();
+
+			Assert.IsFalse(_unitUnderTest.IsSelected);
 		}
 	}
 }

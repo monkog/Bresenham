@@ -59,10 +59,7 @@ namespace SimplePaint
 		/// Is the user changing color
 		/// </summary>
 		private bool _doChangeColor;
-		/// <summary>
-		/// The selected vertex
-		/// </summary>
-		private CustomEllipse _selectedVertex;
+
 		/// <summary>
 		/// Is the user changing thickness
 		/// </summary>
@@ -151,7 +148,7 @@ namespace SimplePaint
 			if (_shapeManager.SelectedFigure == null) return;
 
 			Cursor = Cursors.SizeAll;
-			if (_shapeManager.SelectedFigure.IsVertex(e.Location, out var vertex)) _selectedVertex = vertex;
+			if (_shapeManager.SelectedFigure.IsVertex(e.Location, out var vertex)) vertex.Select();
 		}
 		/// <summary>
 		/// Handles the MouseMove event of the drawingArea control.
@@ -166,7 +163,7 @@ namespace SimplePaint
 				Cursor = Cursors.Cross;
 
 			if (_shapeManager.SelectedFigure == null && !_doDrawFigure && !_doAddVertex && SetCursorImage(e.Location)) return;
-			if (_selectedVertex != null && MoveVertex(e.X, e.Y, e.Location)) return;
+			if (_shapeManager.SelectedFigure != null && _shapeManager.SelectedFigure.Vertices.Any(v => v.IsSelected) && MoveVertex(e.X, e.Y, e.Location)) return;
 			if (_shapeManager.SelectedFigure != null && !MoveFigure(e.Location)) return;
 
 			// Proceed when drawing current figure is in progress. 
@@ -189,7 +186,6 @@ namespace SimplePaint
 		{
 			_mouseUpPosition = new Point(e.X, e.Y);
 			_shapeManager.DeselectFigures();
-			_selectedVertex = null;
 
 			CustomFigure figure;
 			CustomLine line;
@@ -374,7 +370,6 @@ namespace SimplePaint
 			_mouseUpPosition = Point.Empty;
 
 			_shapeManager.DeselectFigures();
-			_selectedVertex = null;
 			_selectedLine = null;
 			_multisamplingFigure = null;
 			_doMultisample = false;
@@ -549,7 +544,7 @@ namespace SimplePaint
 				if (IsFigureComplete(_mouseUpPosition))
 				{
 					if (_currentFigure.Vertices.Count < 3) return true;
-					
+
 					_shapeManager.Figures.Add(_currentFigure);
 					_currentFigure.FigureShapes.Remove(_currentFigure.FigureShapes.Last());
 					_currentFigure.FigureShapes.AddLast(new CustomLine(_currentFigure.LastVertex.Position,
@@ -576,11 +571,13 @@ namespace SimplePaint
 			int deltaX = _mouseLastPosition.X - x;
 			int deltaY = _mouseLastPosition.Y - y;
 
+			var vertex = _shapeManager.SelectedFigure.SelectedVertex;
+
 			// Prevent draging the figure outside the drawing area, so that it won't loose it's vertices and edges.
-			if (_selectedVertex.Position.X - deltaX > drawingArea.Bounds.Width - 10
-				|| _selectedVertex.Position.Y - deltaY > drawingArea.Bounds.Height - 10
-				|| _selectedVertex.Position.X - deltaX < 5
-				|| _selectedVertex.Position.Y - deltaY < 5)
+			if (vertex.Position.X - deltaX > drawingArea.Bounds.Width - 10
+				|| vertex.Position.Y - deltaY > drawingArea.Bounds.Height - 10
+				|| vertex.Position.X - deltaX < 5
+				|| vertex.Position.Y - deltaY < 5)
 				return true;
 
 			Cursor = Cursors.Hand;
@@ -590,14 +587,14 @@ namespace SimplePaint
 				where shape.GetType() == typeof(CustomEllipse)
 				select shape as CustomEllipse)
 			{
-				if (ellipse.Position != _selectedVertex.Position) continue;
+				if (ellipse.Position != vertex.Position) continue;
 
 				var node = _shapeManager.SelectedFigure.FigureShapes.Find(ellipse);
 
 				SetLinePosition(node, deltaX, deltaY);
 				ellipse.Position = new Point(ellipse.Position.X - deltaX, ellipse.Position.Y - deltaY);
-				_shapeManager.SelectedFigure.Vertices.Find(_selectedVertex).Value.Position =
-					new Point(_selectedVertex.Position.X - deltaX, _selectedVertex.Position.Y - deltaY);
+				_shapeManager.SelectedFigure.Vertices.Find(vertex).Value.Position =
+					new Point(vertex.Position.X - deltaX, vertex.Position.Y - deltaY);
 
 				drawingArea.Refresh();
 				SetFigureBounds();

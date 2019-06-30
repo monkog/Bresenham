@@ -166,7 +166,7 @@ namespace SimplePaintTests.Shapes
 		}
 
 		[TestMethod]
-		public void Select_NoParams_FigureSelected()
+		public void Select_NoParams_Selected()
 		{
 			_unitUnderTest.Select();
 
@@ -174,13 +174,49 @@ namespace SimplePaintTests.Shapes
 		}
 
 		[TestMethod]
-		public void Deselect_NoParams_SelectedFigureNull()
+		public void Deselect_NoParams_NotSelected()
 		{
 			_unitUnderTest.Select();
 
 			_unitUnderTest.Deselect();
 
 			Assert.IsFalse(_unitUnderTest.IsSelected);
+		}
+
+		[TestMethod]
+		public void Deselect_NoParams_AllVerticesDeselected()
+		{
+			_unitUnderTest.Select();
+			var vertex = _unitUnderTest.Vertices.First.Value;
+			vertex.Select();
+
+			_unitUnderTest.Deselect();
+
+			Assert.IsFalse(vertex.IsSelected);
+		}
+
+		[TestMethod]
+		public void Deselect_NoParams_SelectedVertexNull()
+		{
+			_unitUnderTest.Select();
+			var vertex = _unitUnderTest.Vertices.First.Value;
+			vertex.Select();
+
+			_unitUnderTest.Deselect();
+
+			Assert.IsNull(_unitUnderTest.SelectedVertex);
+		}
+
+		[TestMethod]
+		public void SelectedVertex_NoParams_SelectedVertex()
+		{
+			var vertex = _unitUnderTest.Vertices.First.Value;
+			vertex.Select();
+
+			var result = _unitUnderTest.SelectedVertex;
+
+			Assert.AreEqual(vertex, result);
+			Assert.IsTrue(result.IsSelected);
 		}
 	}
 }
