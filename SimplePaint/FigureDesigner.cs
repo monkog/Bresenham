@@ -21,10 +21,6 @@ namespace SimplePaint
 		#region Private Members
 
 		/// <summary>
-		/// Is this the first vertex
-		/// </summary>
-		private bool _isFirstVertex;
-		/// <summary>
 		/// The currently drawn figure
 		/// </summary>
 		private CustomFigure _currentFigure;
@@ -224,7 +220,6 @@ namespace SimplePaint
 				SetButtonStates(addVertex: false, drawFigure: false, changeColor: false
 					, changeThickness: false, doMultisampling: false);
 				_currentFigure = null;
-				_isFirstVertex = true;
 				return;
 			}
 
@@ -362,7 +357,6 @@ namespace SimplePaint
 			SetButtonStates(addVertex: false, drawFigure: false, changeColor: false
 				, changeThickness: false, doMultisampling: false);
 
-			_isFirstVertex = true;
 			_shapeManager.Figures.Clear();
 			_currentFigure = null;
 			drawingArea.Refresh();
@@ -544,9 +538,8 @@ namespace SimplePaint
 		/// <returns>True if the figure is completed or can be completed but has less than 3 vertices</returns>
 		private bool DrawFigure()
 		{
-			if (_isFirstVertex)
+			if (_currentFigure == null)
 			{
-				_isFirstVertex = false;
 				_currentFigure = new CustomFigure(_mouseUpPosition, _color, _strokeThickness);
 			}
 			else
@@ -554,8 +547,7 @@ namespace SimplePaint
 				if (IsFigureComplete(_mouseUpPosition))
 				{
 					if (_currentFigure.Vertices.Count < 3) return true;
-
-					_isFirstVertex = true;
+					
 					_shapeManager.Figures.Add(_currentFigure);
 					_currentFigure.FigureShapes.Remove(_currentFigure.FigureShapes.Last());
 					_currentFigure.FigureShapes.AddLast(new CustomLine(_currentFigure.LastVertex.Position,
