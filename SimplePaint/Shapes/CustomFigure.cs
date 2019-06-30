@@ -136,11 +136,7 @@ namespace SimplePaint.Shapes
 			FigureShapes.Remove(line);
 
 			Vertices.AddAfter(Vertices.Find(FindVertexAtPoint(previousEllipse.Position)), vertex);
-
-			if (vertex.Position.X + 5 > MaxX) MaxX = vertex.Position.X + 5;
-			if (vertex.Position.X - 5 < MinX) MinX = vertex.Position.X - 5;
-			if (vertex.Position.Y + 5 > MaxY) MaxY = vertex.Position.Y + 5;
-			if (vertex.Position.Y - 5 < MinY) MinY = vertex.Position.Y - 5;
+			UpdateBoundingBox(vertex.Position);
 		}
 
 		/// <summary>
@@ -154,10 +150,7 @@ namespace SimplePaint.Shapes
 			Vertices.AddLast(new CustomEllipse(point));
 			FigureShapes.AddLast(new CustomEllipse(point));
 
-			if (point.X > MaxX) MaxX = point.X;
-			if (point.X < MinX) MinX = point.X;
-			if (point.Y > MaxY) MaxY = point.Y;
-			if (point.Y < MinY) MinY = point.Y;
+			UpdateBoundingBox(point);
 		}
 
 		/// <summary>
@@ -202,6 +195,14 @@ namespace SimplePaint.Shapes
 
 			vertex = FindVertexAtPoint(point);
 			return vertex != null;
+		}
+
+		private void UpdateBoundingBox(Point point)
+		{
+			if (point.X > MaxX) MaxX = point.X;
+			if (point.X < MinX) MinX = point.X;
+			if (point.Y > MaxY) MaxY = point.Y;
+			if (point.Y < MinY) MinY = point.Y;
 		}
 
 		private bool IsOutsideBoundingBox(Point point)
