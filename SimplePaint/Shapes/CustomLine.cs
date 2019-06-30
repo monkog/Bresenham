@@ -29,117 +29,92 @@ namespace SimplePaint.Shapes
 		/// <inheritdoc/>
 		public void Draw(Graphics graphics, Color color, int thickness)
 		{
-			SymmetricBresenham(graphics, color, thickness);
+			var brush = new SolidBrush(color);
+			SymmetricBresenham(graphics, brush, thickness);
 			Multisampling(graphics, color, thickness);
 		}
 
-		/// <summary>
-		/// Draws the line using the Symmetric Bresenham algorithm.
-		/// </summary>
-		/// <param name="graphics">The graphics.</param>
-		/// <param name="color">The color of the line.</param>
-		/// <param name="thickness">The thickness of the line.</param>
-		private void SymmetricBresenham(Graphics graphics, Color color, int thickness)
+		private void SymmetricBresenham(Graphics graphics, Brush brush, int thickness)
 		{
 			var upPixels = thickness / 2;
 			var downPixels = thickness - upPixels;
 
-			var x1 = StartPoint.X;
-			var x2 = EndPoint.X;
-			var y1 = StartPoint.Y;
-			var y2 = EndPoint.Y;
+			var direction = new LineDirection(this);
+			DrawPixel(graphics, brush, StartPoint);
+			DrawPixel(graphics, brush, EndPoint);
 
-			var direction = this.FindDrawingDirection();
-
-			//graphics.FillRectangle(new SolidBrush(color), new Rectangle(new Point(x1, y1), new Size(1, 1)));
-			//graphics.FillRectangle(new SolidBrush(color), new Rectangle(new Point(x2, y2), new Size(1, 1)));
-
-			var dx = Math.Abs(direction.X);
-			var dy = Math.Abs(direction.Y);
-			var incrX = Math.Sign(direction.X);
-			var incrY = Math.Sign(direction.Y);
-
-			if (dx > dy)
-				DrawLine(graphics, color, x1, y1, x2, y2, dy, dx, incrX, incrY, upPixels, downPixels, isHorizontal: true);
+			if (direction.Dx > direction.Dy)
+				DrawHorizontalLine(graphics, brush, direction, upPixels, downPixels);
 			else
-				DrawLine(graphics, color, y1, x1, y2, x2, dx, dy, incrY, incrX, upPixels, downPixels, isHorizontal: false);
+				DrawVerticalLine(graphics, brush, direction, upPixels, downPixels);
 		}
 
-		/// <summary>
-		/// Draws the line.
-		/// </summary>
-		/// <param name="graphics">The graphics.</param>
-		/// <param name="color">The color.</param>
-		/// <param name="x1">The x coordinate of the start point.</param>
-		/// <param name="x2">The x coordinate of the end point.</param>
-		/// <param name="y1">The y coordinate of the start point.</param>
-		/// <param name="y2">The y coordinate of the end point.</param>
-		/// <param name="incrX">The direction x coordinate. Positive value is right.</param>
-		/// <param name="incrY">The direction y coordinate. Positive value is up.</param>
-		/// <param name="dx">The step in x coordinate.</param>
-		/// <param name="dy">The step in y coordinate.</param>
-		/// <param name="upPixels">Number of pixels to copy above the line.</param>
-		/// <param name="downPixels">Number of pixels to copy below the line.</param>
-		/// <param name="isHorizontal">Is the line horizontal</param>
-		private static void DrawLine(Graphics graphics, Color color, int x1, int y1, int x2, int y2
-			, int dy, int dx, int incrX, int incrY, int upPixels, int downPixels, bool isHorizontal)
+		private void DrawHorizontalLine(Graphics graphics, Brush brush, LineDirection direction, int upPixels, int downPixels)
 		{
-			var xf = x1;
-			var yf = y1;
-			var xb = x2;
-			var yb = y2;
-			var incrE = 2 * dy;
-			var incrNe = 2 * (dy - dx);
-			var d = 2 * dy - dx;
-			var brush = new SolidBrush(color);
+			var x = StartPoint.X;
+			var y = StartPoint.Y;
 
-			while (xf != xb && xf - 1 != xb && xf + 1 != xb)
+			// The precise step delta
+			var d0 = 2 * direction.Dy - direction.Dx;
+			var dE = 2 * direction.Dy;
+			var dNe = 2 * (direction.Dy - direction.Dx);
+
+			while (x != EndPoint.X)
 			{
-				xf += incrX;
-				xb -= incrX;
-				if (d < 0) //Choose E and W
-					d += incrE;
+				if (d0 < 0) //Choose E and W
+				{
+					d0 += dE;
+					x += direction.IncrementX;
+				}
 				else //Choose NE and SW
 				{
-					d += incrNe;
-					yf += incrY;
-					yb -= incrY;
+					d0 += dNe;
+					y += direction.IncrementY;
+					x += direction.IncrementX;
 				}
 
-				if (isHorizontal)
-					DrawLineSegment(graphics, xf, yf, xb, yb, upPixels, downPixels, brush, isHorizontal);
-				else
-					DrawLineSegment(graphics, yf, xf, yb, xb, upPixels, downPixels, brush, isHorizontal);
+				DrawLineSegment(graphics, x, y, upPixels, downPixels, brush, true);
 			}
 		}
 
-		/// <summary>
-		/// Draws the line segment.
-		/// </summary>
-		/// <param name="graphics">The graphics.</param>
-		/// <param name="x1">The x coordinate of the start point.</param>
-		/// <param name="y1">The y coordinate of the start point.</param>
-		/// <param name="x2">The x coordinate of the end point.</param>
-		/// <param name="y2">The y coordinate of the end point.</param>
-		/// <param name="upPixels">Number of pixels to copy above the line.</param>
-		/// <param name="downPixels">Number of pixels to copy below the line.</param>
-		/// <param name="brush">The brush.</param>
-		/// <param name="isLineHorizontal">Is the line's steapness less than 45 deg</param>
-		private static void DrawLineSegment(Graphics graphics, int x1, int y1, int x2, int y2
-			, int upPixels, int downPixels, Brush brush, bool isLineHorizontal)
+		private void DrawVerticalLine(Graphics graphics, Brush brush, LineDirection direction, int upPixels, int downPixels)
 		{
-			var horizontalMultiplier = isLineHorizontal ? 1 : 0;
+			var x = StartPoint.X;
+			var y = StartPoint.Y;
+
+			// The precise step delta
+			var d0 = 2 * direction.Dx - direction.Dy;
+			var dE = 2 * direction.Dx;
+			var dNe = 2 * (direction.Dx - direction.Dy);
+
+			while (y != EndPoint.Y)
+			{
+				if (d0 < 0) //Choose E and W
+				{
+					d0 += dE;
+					y += direction.IncrementY;
+				}
+				else //Choose NE and SW
+				{
+					d0 += dNe;
+					y += direction.IncrementY;
+					x += direction.IncrementX;
+				}
+
+				DrawLineSegment(graphics, x, y, upPixels, downPixels, brush, false);
+			}
+		}
+
+		private static void DrawLineSegment(Graphics graphics, int x1, int y1, int upPixels, int downPixels, Brush brush, bool isLineHorizontal)
+		{
+			var horizontalMultiplier = isLineHorizontal ? 0 : 1;
 			var verticalMultiplier = 1 - horizontalMultiplier;
+
 			for (var i = 0; i <= upPixels; i++)
-			{
-				graphics.FillRectangle(brush, new Rectangle(new Point(x1 + i * horizontalMultiplier, y1 + i * verticalMultiplier), PixelSize));
-				graphics.FillRectangle(brush, new Rectangle(new Point(x2 + i * horizontalMultiplier, y2 + i * verticalMultiplier), PixelSize));
-			}
+				DrawPixel(graphics, brush, new Point(x1 + i * horizontalMultiplier, y1 + i * verticalMultiplier));
+
 			for (var i = 0; i <= downPixels; i++)
-			{
-				graphics.FillRectangle(brush, new Rectangle(new Point(x1 - i * horizontalMultiplier, y1 - i * verticalMultiplier), PixelSize));
-				graphics.FillRectangle(brush, new Rectangle(new Point(x2 - i * horizontalMultiplier, y2 - i * verticalMultiplier), PixelSize));
-			}
+				DrawPixel(graphics, brush, new Point(x1 - i * horizontalMultiplier, y1 - i * verticalMultiplier));
 		}
 
 		private void Multisampling(Graphics graphics, Color color, int thickness)
@@ -178,6 +153,11 @@ namespace SimplePaint.Shapes
 			var intIntensity = (int)(intensity * 255);
 			graphics.FillRectangle(new SolidBrush(Color.FromArgb(intIntensity, color)), new Rectangle(new Point(x, y), PixelSize));
 			//WritePixel(x, y, intensity);
+		}
+
+		private static void DrawPixel(Graphics graphics, Brush brush, Point point)
+		{
+			graphics.FillRectangle(brush, new Rectangle(point, new Size(1, 1)));
 		}
 	}
 }
