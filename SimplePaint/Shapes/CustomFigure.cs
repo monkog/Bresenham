@@ -10,6 +10,8 @@ namespace SimplePaint.Shapes
 	/// </summary>
 	public class CustomFigure
 	{
+		private const int Delta = 5;
+
 		/// <summary>
 		/// Gets the first node in the LinkedList.
 		/// </summary>
@@ -171,36 +173,37 @@ namespace SimplePaint.Shapes
 		}
 
 		/// <summary>
-		/// Determines whether [is point in figure].
+		/// Determines whether this figure contains the given point.
 		/// </summary>
-		/// <param name="point">The point.</param>
-		/// <param name="figure">The figure.</param>
+		/// <param name="point">The point to look for.</param>
 		/// <returns>True if the hit point is in a figure</returns>
-		public static bool IsPointInFigure(Point point, CustomFigure figure)
+		public bool ContainsPoint(Point point)
 		{
-			if (point.X < figure.MinX - 5 || point.X > figure.MaxX + 5
-				|| point.Y < figure.MinY - 5 || point.Y > figure.MaxY + 5)
-				return false;
+			if (IsOutsideBoundingBox(point)) return false;
 
-			var firstVertex = figure.FirstNode;
-			var lastVertex = figure.LastNode;
+			var currentVertex = FirstNode;
+			var previousVertex = LastNode;
 
 			var isInFigure = false;
 
-			for (var i = 0; i < figure.VertexNumber; i++)
+			for (var i = 0; i < VertexNumber; i++)
 			{
-				var iX = firstVertex.Value.Position.X;
-				var iY = firstVertex.Value.Position.Y;
-				var jX = lastVertex.Value.Position.X;
-				var jY = lastVertex.Value.Position.Y;
+				var x1 = previousVertex.Value.Position.X;
+				var y1 = previousVertex.Value.Position.Y;
+				var x2 = currentVertex.Value.Position.X;
+				var y2 = currentVertex.Value.Position.Y;
 
-				if ((iY > point.Y) != (jY > point.Y)
-					&& (point.X < (jX - iX) * (point.Y - iY) / (jY - iY) + iX))
-					isInFigure = !isInFigure;
-				lastVertex = firstVertex;
-				firstVertex = firstVertex.Next;
+				if ((y2 > point.Y) != (y1 > point.Y) && (point.X < (x1 - x2) * (point.Y - y2) / (y1 - y2) + x2)) isInFigure = !isInFigure;
+				previousVertex = currentVertex;
+				currentVertex = currentVertex.Next;
 			}
+
 			return isInFigure;
+		}
+
+		private bool IsOutsideBoundingBox(Point point)
+		{
+			return point.X < MinX - Delta || point.X > MaxX + Delta || point.Y < MinY - Delta || point.Y > MaxY + Delta;
 		}
 
 		/// <summary>

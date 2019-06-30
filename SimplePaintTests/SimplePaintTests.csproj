@@ -54,6 +54,7 @@
     <Compile Include="Shapes\CustomEllipseTests.cs" />
     <Compile Include="Shapes\LineDirectionTests.cs" />
     <Compile Include="ShapeManagerTests.cs" />
+    <Compile Include="Shapes\CustomFigureTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

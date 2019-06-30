@@ -28,7 +28,7 @@ namespace SimplePaint
 		/// <param name="location">Location of the figure.</param>
 		public void SelectFigure(Point location)
 		{
-			SelectedFigure = Figures.FirstOrDefault(f => CustomFigure.IsPointInFigure(location, f));
+			SelectedFigure = Figures.FirstOrDefault(f => f.ContainsPoint(location));
 		}
 
 		/// <summary>

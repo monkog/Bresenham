@@ -564,7 +564,7 @@ namespace SimplePaint
 					return true;
 				}
 
-				if (_shapeManager.Figures.Any(figure => CustomFigure.IsPointInFigure(location, figure)))
+				if (_shapeManager.Figures.Any(figure => figure.ContainsPoint(location)))
 				{
 					Cursor = Cursors.SizeAll;
 					return true;
