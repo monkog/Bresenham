@@ -181,7 +181,7 @@ namespace SimplePaint
 			if (_shapeManager.SelectedFigure == null) return;
 
 			Cursor = Cursors.SizeAll;
-			if (CustomFigure.IsVertex(e.Location, _shapeManager.SelectedFigure, out var vertex)) _selectedVertex = vertex;
+			if (_shapeManager.SelectedFigure.IsVertex(e.Location, out var vertex)) _selectedVertex = vertex;
 		}
 		/// <summary>
 		/// Handles the MouseMove event of the drawingArea control.
@@ -557,8 +557,7 @@ namespace SimplePaint
 			}
 			else if (!_doChangeColor && !_doChangeThickness)
 			{
-				CustomEllipse outVertex;
-				if (_shapeManager.Figures.Any(figure => CustomFigure.IsVertex(location, figure, out outVertex)))
+				if (_shapeManager.Figures.Any(figure => figure.IsVertex(location, out _)))
 				{
 					Cursor = _handCursor;
 					return true;

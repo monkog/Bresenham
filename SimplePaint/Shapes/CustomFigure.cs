@@ -10,7 +10,7 @@ namespace SimplePaint.Shapes
 	/// </summary>
 	public class CustomFigure
 	{
-		private const int Delta = 5;
+		private const int Delta = 10;
 
 		/// <summary>
 		/// Gets the first node in the LinkedList.
@@ -141,7 +141,7 @@ namespace SimplePaint.Shapes
 			FigureShapes.AddAfter(previousNode.Next.Next, new CustomLine(vertex.Position, nextEllipse.Position));
 			FigureShapes.Remove(line);
 
-			FigureVertices.AddAfter(FigureVertices.Find(FindVertexWithValue(previousEllipse.Position)), vertex);
+			FigureVertices.AddAfter(FigureVertices.Find(FindVertexAtPoint(previousEllipse.Position)), vertex);
 
 			VertexNumber++;
 
@@ -201,45 +201,30 @@ namespace SimplePaint.Shapes
 			return isInFigure;
 		}
 
+		/// <summary>
+		/// Determines whether the specified point is vertex.
+		/// </summary>
+		/// <param name="point">The point.</param>
+		/// <param name="vertex">The found vertex.</param>
+		/// <returns>True if the hit point is vertex, false otherwise.</returns>
+		public bool IsVertex(Point point, out CustomEllipse vertex)
+		{
+			vertex = null;
+			if (IsOutsideBoundingBox(point)) return false;
+
+			vertex = FindVertexAtPoint(point);
+			return vertex !=null;
+		}
+
 		private bool IsOutsideBoundingBox(Point point)
 		{
 			return point.X < MinX - Delta || point.X > MaxX + Delta || point.Y < MinY - Delta || point.Y > MaxY + Delta;
 		}
 
-		/// <summary>
-		/// Determines whether the specified point is vertex.
-		/// </summary>
-		/// <param name="point">The point.</param>
-		/// <param name="figure">The figure.</param>
-		/// <param name="outVertex">The out vertex.</param>
-		/// <returns>True if the hit point is vertex, false otherwise</returns>
-		public static bool IsVertex(Point point, CustomFigure figure, out CustomEllipse outVertex)
+		private CustomEllipse FindVertexAtPoint(Point point)
 		{
-			outVertex = null;
-
-			if (point.X < figure.MinX - 10 || point.X > figure.MaxX + 10
-				|| point.Y < figure.MinY - 10 || point.Y > figure.MaxY + 10)
-				return false;
-
-			foreach (var vertex in figure.FigureVertices.Where(
-				vertex => point.X < vertex.Position.X + 10 && point.X > vertex.Position.X - 10
-					&& point.Y < vertex.Position.Y + 10 && point.Y > vertex.Position.Y - 10))
-			{
-				outVertex = vertex;
-				return true;
-			}
-
-			return false;
-		}
-
-		/// <summary>
-		/// Finds the vertex with value.
-		/// </summary>
-		/// <param name="point">The point.</param>
-		/// <returns>First vertex with the specified position or null if one does not exist</returns>
-		private CustomEllipse FindVertexWithValue(Point point)
-		{
-			return FigureVertices.FirstOrDefault(x => x.Position == point);
+			return FigureVertices.FirstOrDefault(v => 
+				point.X < v.Position.X + Delta && point.X > v.Position.X - Delta && point.Y < v.Position.Y + Delta && point.Y > v.Position.Y - Delta);
 		}
 	}
 }

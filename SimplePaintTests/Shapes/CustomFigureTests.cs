@@ -39,5 +39,28 @@ namespace SimplePaintTests.Shapes
 
 			Assert.AreEqual(isInFigure, result);
 		}
+
+		[DataTestMethod]
+		[DataRow(100, 100)]
+		[DataRow(0, 10)]
+		[DataRow(0, -10)]
+		public void IsVertex_NotVertexPoint_False(int x, int y)
+		{
+			var result = _unitUnderTest.IsVertex(new Point(x, y), out var vertex);
+
+			Assert.IsFalse(result);
+			Assert.IsNull(vertex);
+		}
+
+		[DataTestMethod]
+		[DataRow(-10, 10)]
+		[DataRow(-11, 11)]
+		public void IsVertex_VertexPoint_True(int x, int y)
+		{
+			var result = _unitUnderTest.IsVertex(new Point(x, y), out var vertex);
+
+			Assert.IsTrue(result);
+			Assert.AreEqual(_unitUnderTest.FirstNode.Value, vertex);
+		}
 	}
 }
