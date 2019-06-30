@@ -64,7 +64,6 @@
     <Compile Include="Shapes\CustomLine.cs" />
     <Compile Include="Shapes\IShape.cs" />
     <Compile Include="Shapes\LineDirection.cs" />
-    <Compile Include="Shapes\LineExtensions.cs" />
     <EmbeddedResource Include="EnterValueWindow.resx">
       <DependentUpon>EnterValueWindow.cs</DependentUpon>
     </EmbeddedResource>
