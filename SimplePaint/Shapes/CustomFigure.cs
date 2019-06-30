@@ -41,7 +41,7 @@ namespace SimplePaint.Shapes
 		/// Gets or sets the stroke thickness.
 		/// </summary>
 		public int StrokeThickness { get; set; }
-
+		
 		/// <summary>
 		/// Gets or sets the maximum x coordinate of the figure.
 		/// </summary>
@@ -111,32 +111,27 @@ namespace SimplePaint.Shapes
 		/// <summary>
 		/// Adds the vertex on the specified line.
 		/// </summary>
-		/// <param name="vertex">The vertex.</param>
-		/// <param name="line">The line.</param>
-		public void AddInbetweenVertex(CustomEllipse vertex, CustomLine line)
+		/// <param name="point">Position of the new vertex.</param>
+		/// <param name="line">The line to add the vertex on.</param>
+		public void AddVertexOnLine(Point point, CustomLine line)
 		{
-			var previousNode = FigureShapes.Find(line).Previous;
-			var nextNode = FigureShapes.Find(line).Next;
+			if (IsVertex(point, out _)) return;
 
-			var previousEllipse = previousNode.Value as CustomEllipse;
-			CustomEllipse nextEllipse;
+			var lineToSplit = FigureShapes.Find(line);
+			var lineStart = lineToSplit.Previous;
+			var lineEnd = lineToSplit.Next ?? FigureShapes.First;
 
-			if (nextNode == null)
-				nextEllipse = FigureShapes.First.Value as CustomEllipse;
-			else
-				nextEllipse = nextNode.Value as CustomEllipse;
+			var previousEllipse = lineStart.Value as CustomEllipse;
+			var nextEllipse = lineEnd.Value as CustomEllipse;
 
-			if (((Math.Abs(vertex.Position.X - previousEllipse.Position.X) < 10 && Math.Abs(vertex.Position.Y - previousEllipse.Position.Y) < 10)
-				|| (Math.Abs(vertex.Position.X - nextEllipse.Position.X) < 10) && Math.Abs(vertex.Position.Y - nextEllipse.Position.Y) < 10))
-				return;
-
-			FigureShapes.AddAfter(previousNode, new CustomLine(previousEllipse.Position, vertex.Position));
-			FigureShapes.AddAfter(previousNode.Next, new CustomEllipse(vertex.Position));
-			FigureShapes.AddAfter(previousNode.Next.Next, new CustomLine(vertex.Position, nextEllipse.Position));
 			FigureShapes.Remove(line);
 
-			Vertices.AddAfter(Vertices.Find(FindVertexAtPoint(previousEllipse.Position)), vertex);
-			UpdateBoundingBox(vertex.Position);
+			FigureShapes.AddAfter(lineStart, new CustomLine(previousEllipse.Position, point));
+			FigureShapes.AddAfter(lineStart.Next, new CustomEllipse(point));
+			FigureShapes.AddAfter(lineStart.Next.Next, new CustomLine(point, nextEllipse.Position));
+
+			Vertices.AddAfter(Vertices.Find(FindVertexAtPoint(previousEllipse.Position)), new CustomEllipse(point));
+			UpdateBoundingBox(point);
 		}
 
 		/// <summary>

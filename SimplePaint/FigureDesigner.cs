@@ -227,7 +227,7 @@ namespace SimplePaint
 			// Add vertex to existing figure.
 			if (!_doDrawFigure && _doAddVertex && _shapeManager.Figures.Any() && IsPointOnBorder(_mouseUpPosition, out figure, out line))
 			{
-				figure.AddInbetweenVertex(new CustomEllipse(_mouseUpPosition), line);
+				figure.AddVertexOnLine(_mouseUpPosition, line);
 				drawingArea.Refresh();
 				return;
 			}
