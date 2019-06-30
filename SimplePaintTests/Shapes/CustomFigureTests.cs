@@ -41,9 +41,9 @@ namespace SimplePaintTests.Shapes
 		}
 
 		[DataTestMethod]
-		[DataRow(100, 100)]
-		[DataRow(0, 10)]
-		[DataRow(0, -10)]
+		[DataRow(100, 100, DisplayName = "Outside bounding box")]
+		[DataRow(0, 10, DisplayName = "Outside figure")]
+		[DataRow(0, -10, DisplayName = "On the edge of the shape")]
 		public void IsVertex_NotVertexPoint_False(int x, int y)
 		{
 			var result = _unitUnderTest.IsVertex(new Point(x, y), out var vertex);
@@ -61,6 +61,42 @@ namespace SimplePaintTests.Shapes
 
 			Assert.IsTrue(result);
 			Assert.AreEqual(_unitUnderTest.FirstNode.Value, vertex);
+		}
+
+		[DataTestMethod]
+		[DataRow(-10, 10, DisplayName = "Already existing vertex - not added")]
+		[DataRow(-11, 11, DisplayName = "Close to already existing vertex - not added")]
+		public void AddVertex_VertexPoint_HasNotBeenAdded(int x, int y)
+		{
+			var vertexCount = _unitUnderTest.Vertices.Count;
+
+			_unitUnderTest.AddVertex(new Point(x, y));
+
+			Assert.AreEqual(vertexCount, _unitUnderTest.Vertices.Count);
+		}
+
+		[TestMethod]
+		public void AddVertex_VertexPoint_HasBeenAdded()
+		{
+			var vertexCount = _unitUnderTest.Vertices.Count;
+
+			_unitUnderTest.AddVertex(new Point(20, 20));
+
+			Assert.AreEqual(vertexCount + 1, _unitUnderTest.Vertices.Count);
+		}
+
+		[TestMethod]
+		public void AddVertex_VertexPoint_BoundingBoxUpdated()
+		{
+			var minX = _unitUnderTest.MinX;
+			var minY = _unitUnderTest.MinY;
+
+			_unitUnderTest.AddVertex(new Point(-20, -40));
+
+			Assert.AreNotEqual(minX, _unitUnderTest.MinX);
+			Assert.AreEqual(-20, _unitUnderTest.MinX);
+			Assert.AreNotEqual(minY, _unitUnderTest.MinY);
+			Assert.AreEqual(-40, _unitUnderTest.MinY);
 		}
 	}
 }

@@ -15,12 +15,12 @@ namespace SimplePaint.Shapes
 		/// <summary>
 		/// Gets the first node in the LinkedList.
 		/// </summary>
-		public LinkedListNode<CustomEllipse> FirstNode => FigureVertices.First;
+		public LinkedListNode<CustomEllipse> FirstNode => Vertices.First;
 
 		/// <summary>
 		/// Gets the last node in the LinkedList.
 		/// </summary>
-		public LinkedListNode<CustomEllipse> LastNode => FigureVertices.Last;
+		public LinkedListNode<CustomEllipse> LastNode => Vertices.Last;
 
 		/// <summary>
 		/// Gets the first vertex.
@@ -63,18 +63,13 @@ namespace SimplePaint.Shapes
 		public int MinY { get; set; }
 
 		/// <summary>
-		/// Gets or sets the vertex number.
-		/// </summary>
-		public int VertexNumber { get; set; }
-
-		/// <summary>
 		/// The figure shapes
 		/// </summary>
 		public LinkedList<IShape> FigureShapes { get; set; }
 		/// <summary>
 		/// Gets or sets the figure vertices.
 		/// </summary>
-		public LinkedList<CustomEllipse> FigureVertices { get; set; }
+		public LinkedList<CustomEllipse> Vertices { get; set; }
 
 		/// <summary>
 		/// Gets or sets the multi-sampling line.
@@ -101,8 +96,8 @@ namespace SimplePaint.Shapes
 			FigureColor = color;
 			StrokeThickness = strokeThickness;
 			VertexSize = StrokeThickness + 6;
-			FigureVertices = new LinkedList<CustomEllipse>();
-			FigureVertices.AddFirst(new CustomEllipse(point));
+			Vertices = new LinkedList<CustomEllipse>();
+			Vertices.AddFirst(new CustomEllipse(point));
 			FigureShapes = new LinkedList<IShape>();
 			FigureShapes.AddFirst(new CustomEllipse(point));
 			MultisamplingLine = null;
@@ -111,7 +106,6 @@ namespace SimplePaint.Shapes
 			MinX = point.X - 5;
 			MaxY = point.Y + 5;
 			MinY = point.Y - 5;
-			VertexNumber++;
 		}
 
 		/// <summary>
@@ -141,9 +135,7 @@ namespace SimplePaint.Shapes
 			FigureShapes.AddAfter(previousNode.Next.Next, new CustomLine(vertex.Position, nextEllipse.Position));
 			FigureShapes.Remove(line);
 
-			FigureVertices.AddAfter(FigureVertices.Find(FindVertexAtPoint(previousEllipse.Position)), vertex);
-
-			VertexNumber++;
+			Vertices.AddAfter(Vertices.Find(FindVertexAtPoint(previousEllipse.Position)), vertex);
 
 			if (vertex.Position.X + 5 > MaxX) MaxX = vertex.Position.X + 5;
 			if (vertex.Position.X - 5 < MinX) MinX = vertex.Position.X - 5;
@@ -154,22 +146,18 @@ namespace SimplePaint.Shapes
 		/// <summary>
 		/// Adds the vertex to the newly constructed figure.
 		/// </summary>
-		/// <param name="point">The point.</param>
+		/// <param name="point">The vertex coordinates.</param>
 		public void AddVertex(Point point)
 		{
-			// We don't want to add next vertex too close to an existing one
-			if (FigureVertices.Any(
-				vertex => Math.Abs(vertex.Position.X - point.X) < 10 && Math.Abs(vertex.Position.Y - point.Y) < 10))
-				return;
+			if (IsVertex(point, out _)) return;
 
-			FigureVertices.AddLast(new CustomEllipse(point));
+			Vertices.AddLast(new CustomEllipse(point));
 			FigureShapes.AddLast(new CustomEllipse(point));
-			var delta = VertexSize / 2;
-			if (point.X + delta > MaxX) MaxX = point.X + delta;
-			if (point.X - delta < MinX) MinX = point.X - delta;
-			if (point.Y + delta > MaxY) MaxY = point.Y + delta;
-			if (point.Y - delta < MinY) MinY = point.Y - delta;
-			VertexNumber++;
+
+			if (point.X > MaxX) MaxX = point.X;
+			if (point.X < MinX) MinX = point.X;
+			if (point.Y > MaxY) MaxY = point.Y;
+			if (point.Y < MinY) MinY = point.Y;
 		}
 
 		/// <summary>
@@ -186,7 +174,7 @@ namespace SimplePaint.Shapes
 
 			var isInFigure = false;
 
-			for (var i = 0; i < VertexNumber; i++)
+			for (var i = 0; i < Vertices.Count; i++)
 			{
 				var x1 = previousVertex.Value.Position.X;
 				var y1 = previousVertex.Value.Position.Y;
@@ -213,7 +201,7 @@ namespace SimplePaint.Shapes
 			if (IsOutsideBoundingBox(point)) return false;
 
 			vertex = FindVertexAtPoint(point);
-			return vertex !=null;
+			return vertex != null;
 		}
 
 		private bool IsOutsideBoundingBox(Point point)
@@ -223,7 +211,7 @@ namespace SimplePaint.Shapes
 
 		private CustomEllipse FindVertexAtPoint(Point point)
 		{
-			return FigureVertices.FirstOrDefault(v => 
+			return Vertices.FirstOrDefault(v =>
 				point.X < v.Position.X + Delta && point.X > v.Position.X - Delta && point.Y < v.Position.Y + Delta && point.Y > v.Position.Y - Delta);
 		}
 	}

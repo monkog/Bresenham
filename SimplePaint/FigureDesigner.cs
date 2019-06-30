@@ -302,7 +302,7 @@ namespace SimplePaint
 		/// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
 		private void changeColorButton_Click(object sender, EventArgs e)
 		{
-			if (_doDrawFigure && _currentFigure != null && _currentFigure.VertexNumber != 0)
+			if (_doDrawFigure && _currentFigure != null && _currentFigure.Vertices.Any())
 			{
 				MessageBox.Show("You have to finish drawing to use this functionality.", "Don't do that!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 				return;
@@ -336,7 +336,7 @@ namespace SimplePaint
 		/// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
 		private void changeSizeButton_Click(object sender, EventArgs e)
 		{
-			if (_doDrawFigure && _currentFigure != null && _currentFigure.VertexNumber != 0)
+			if (_doDrawFigure && _currentFigure != null && _currentFigure.Vertices.Any())
 			{
 				MessageBox.Show("You have to finish drawing to use this functionality.", "Don't do that!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 				return;
@@ -616,7 +616,7 @@ namespace SimplePaint
 			{
 				if (IsFigureComplete(_mouseUpPosition))
 				{
-					if (_currentFigure.VertexNumber < 3) return true;
+					if (_currentFigure.Vertices.Count < 3) return true;
 
 					_isFirstVertex = true;
 					_shapeManager.Figures.Add(_currentFigure);
@@ -665,7 +665,7 @@ namespace SimplePaint
 
 				SetLinePosition(node, deltaX, deltaY);
 				ellipse.Position = new Point(ellipse.Position.X - deltaX, ellipse.Position.Y - deltaY);
-				_shapeManager.SelectedFigure.FigureVertices.Find(_selectedVertex).Value.Position =
+				_shapeManager.SelectedFigure.Vertices.Find(_selectedVertex).Value.Position =
 					new Point(_selectedVertex.Position.X - deltaX, _selectedVertex.Position.Y - deltaY);
 
 				drawingArea.Refresh();
@@ -716,7 +716,7 @@ namespace SimplePaint
 			_shapeManager.SelectedFigure.MinX = int.MaxValue;
 			_shapeManager.SelectedFigure.MinY = int.MaxValue;
 
-			foreach (var vertex in _shapeManager.SelectedFigure.FigureVertices)
+			foreach (var vertex in _shapeManager.SelectedFigure.Vertices)
 			{
 				if (vertex.Position.X < _shapeManager.SelectedFigure.MinX) _shapeManager.SelectedFigure.MinX = vertex.Position.X;
 				if (vertex.Position.Y < _shapeManager.SelectedFigure.MinY) _shapeManager.SelectedFigure.MinY = vertex.Position.Y;
@@ -756,7 +756,7 @@ namespace SimplePaint
 					line.EndPoint = new Point(line.EndPoint.X - deltaX, line.EndPoint.Y - deltaY);
 				}
 
-			foreach (CustomEllipse vertex in _shapeManager.SelectedFigure.FigureVertices)
+			foreach (CustomEllipse vertex in _shapeManager.SelectedFigure.Vertices)
 				vertex.Position = new Point(vertex.Position.X - deltaX, vertex.Position.Y - deltaY);
 
 			_shapeManager.SelectedFigure.MaxX -= deltaX;
