@@ -164,5 +164,23 @@ namespace SimplePaintTests.Shapes
 		{
 			Assert.Fail();
 		}
+
+		[TestMethod]
+		public void Select_NoParams_FigureSelected()
+		{
+			_unitUnderTest.Select();
+
+			Assert.IsTrue(_unitUnderTest.IsSelected);
+		}
+
+		[TestMethod]
+		public void Deselect_NoParams_SelectedFigureNull()
+		{
+			_unitUnderTest.Select();
+
+			_unitUnderTest.Deselect();
+
+			Assert.IsFalse(_unitUnderTest.IsSelected);
+		}
 	}
 }

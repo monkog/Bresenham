@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 
@@ -70,6 +69,11 @@ namespace SimplePaint.Shapes
 		/// Gets or sets the figure vertices.
 		/// </summary>
 		public LinkedList<CustomEllipse> Vertices { get; set; }
+
+		/// <summary>
+		/// Gets the value determining whether this figure is selected.
+		/// </summary>
+		public bool IsSelected { get; private set; }
 
 		/// <summary>
 		/// Gets or sets the multi-sampling line.
@@ -182,6 +186,22 @@ namespace SimplePaint.Shapes
 
 			vertex = FindVertexAtPoint(point);
 			return vertex != null;
+		}
+
+		/// <summary>
+		/// Selects the figure.
+		/// </summary>
+		public void Select()
+		{
+			IsSelected = true;
+		}
+
+		/// <summary>
+		/// Deselects the figure.
+		/// </summary>
+		public void Deselect()
+		{
+			IsSelected = false;
 		}
 
 		/// <summary>

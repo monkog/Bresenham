@@ -42,17 +42,19 @@ namespace SimplePaintTests
 			_unitUnderTest.SelectFigure(new Point(0, 0));
 			
 			Assert.AreEqual(_figure, _unitUnderTest.SelectedFigure);
+			Assert.IsTrue(_figure.IsSelected);
 		}
 
 		[TestMethod]
-		public void DeselectFigure_NoParams_SelectedFigureNull()
+		public void DeselectFigures_NoParams_SelectedFigureNull()
 		{
 			_unitUnderTest.Figures.Add(_figure);
 			_unitUnderTest.SelectFigure(new Point(0, 0));
 
-			_unitUnderTest.DeselectFigure();
+			_unitUnderTest.DeselectFigures();
 
 			Assert.IsNull(_unitUnderTest.SelectedFigure);
+			Assert.IsFalse(_figure.IsSelected);
 		}
 	}
 }

@@ -188,7 +188,7 @@ namespace SimplePaint
 		private void drawingArea_MouseUp(object sender, MouseEventArgs e)
 		{
 			_mouseUpPosition = new Point(e.X, e.Y);
-			_shapeManager.DeselectFigure();
+			_shapeManager.DeselectFigures();
 			_selectedVertex = null;
 
 			CustomFigure figure;
@@ -373,7 +373,7 @@ namespace SimplePaint
 			_mouseDownPosition = Point.Empty;
 			_mouseUpPosition = Point.Empty;
 
-			_shapeManager.DeselectFigure();
+			_shapeManager.DeselectFigures();
 			_selectedVertex = null;
 			_selectedLine = null;
 			_multisamplingFigure = null;

@@ -15,7 +15,7 @@ namespace SimplePaint
 		/// <summary>
 		/// Gets the selected figure.
 		/// </summary>
-		public CustomFigure SelectedFigure { get; private set; }
+		public CustomFigure SelectedFigure => Figures.SingleOrDefault(f => f.IsSelected);
 
 		public ShapeManager()
 		{
@@ -28,15 +28,16 @@ namespace SimplePaint
 		/// <param name="location">Location of the figure.</param>
 		public void SelectFigure(Point location)
 		{
-			SelectedFigure = Figures.FirstOrDefault(f => f.ContainsPoint(location));
+			var figure = Figures.FirstOrDefault(f => f.ContainsPoint(location));
+			figure?.Select();
 		}
 
 		/// <summary>
 		/// Deselects the selected figure.
 		/// </summary>
-		public void DeselectFigure()
+		public void DeselectFigures()
 		{
-			SelectedFigure = null;
+			Figures.ForEach(f => f.Deselect());
 		}
 	}
 }
