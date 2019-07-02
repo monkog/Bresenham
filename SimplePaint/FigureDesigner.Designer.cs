@@ -118,6 +118,7 @@
 			// 
 			// colorPictureBox
 			// 
+			this.colorPictureBox.BackColor = System.Drawing.Color.OliveDrab;
 			this.colorPictureBox.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
 			this.colorPictureBox.Location = new System.Drawing.Point(4, 398);
 			this.colorPictureBox.Name = "colorPictureBox";

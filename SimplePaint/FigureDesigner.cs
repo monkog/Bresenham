@@ -24,10 +24,6 @@ namespace SimplePaint
 		/// </summary>
 		private CustomFigure _currentFigure;
 		/// <summary>
-		/// The current color
-		/// </summary>
-		private Color _color;
-		/// <summary>
 		/// The current stroke thickness
 		/// </summary>
 		private int _strokeThickness;
@@ -272,24 +268,17 @@ namespace SimplePaint
 
 			if (_doChangeColor && !_doDrawFigure)
 			{
-				SetButtonStates(addVertex: false, drawFigure: false, changeColor: false
-					, changeThickness: false, doMultisampling: false);
+				SetButtonStates(false, false, false, false, false);
 				return;
 			}
 
-			ColorDialog colorDialog = new ColorDialog();
-			colorDialog.AllowFullOpen = true;
+			var colorDialog = new ColorDialog { AllowFullOpen = true };
 
-			if (colorDialog.ShowDialog() == DialogResult.OK)
-			{
-				_color = colorDialog.Color;
-				colorPictureBox.BackColor = _color;
-				drawingArea.Refresh();
+			if (colorDialog.ShowDialog() != DialogResult.OK) return;
+			colorPictureBox.BackColor = colorDialog.Color;
+			drawingArea.Refresh();
 
-				if (!_doDrawFigure)
-					SetButtonStates(addVertex: false, drawFigure: false, changeColor: true
-						, changeThickness: false, doMultisampling: false);
-			}
+			if (!_doDrawFigure) SetButtonStates(false, false, true, false, false);
 		}
 		/// <summary>
 		/// Handles the Click event of the changeSizeButton control.
@@ -359,8 +348,6 @@ namespace SimplePaint
 
 		private void InitializeDefaultValues()
 		{
-			_color = Color.Red;
-			colorPictureBox.BackColor = _color;
 			_strokeThickness = 2;
 
 			_mouseDownPosition = Point.Empty;
@@ -522,7 +509,7 @@ namespace SimplePaint
 
 			if (!IsPointOnBorder(location, out outFigure, out outLine)) return false;
 
-			outFigure.FigureColor = _color;
+			outFigure.FigureColor = colorPictureBox.BackColor;
 			drawingArea.Refresh();
 			return true;
 		}
@@ -534,7 +521,7 @@ namespace SimplePaint
 		{
 			if (_currentFigure == null)
 			{
-				_currentFigure = new CustomFigure(_mouseUpPosition, _color, _strokeThickness);
+				_currentFigure = new CustomFigure(_mouseUpPosition, colorPictureBox.BackColor, _strokeThickness);
 			}
 			else
 			{
@@ -577,7 +564,7 @@ namespace SimplePaint
 			_mouseLastPosition = point;
 			return false;
 		}
-		
+
 		private bool MoveFigure(Point point)
 		{
 			var deltaX = point.X - _mouseLastPosition.X;
