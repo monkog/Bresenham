@@ -213,6 +213,22 @@ namespace SimplePaint.Shapes
 		}
 
 		/// <summary>
+		/// Determines whether this vertex can be dragged by the given deltas.
+		/// </summary>
+		/// <param name="deltaX">Change in x coordinate.</param>
+		/// <param name="deltaY">Change in y coordinate.</param>
+		/// <param name="xBound">Max x position that can be set.</param>
+		/// <param name="yBound">Max y position that can be set.</param>
+		/// <returns>True if this vertex can be dragged, false otherwise.</returns>
+		public bool CanDrag(int deltaX, int deltaY, int xBound, int yBound)
+		{
+			return MaxX + deltaX < xBound - Delta
+			       && MinX + deltaX > Delta
+			       && MaxY + deltaY < yBound - Delta
+			       && MinY + deltaY > Delta;
+		}
+
+		/// <summary>
 		/// Moves the figure by the given delta.
 		/// </summary>
 		/// <param name="deltaX">Change in X coordinate.</param>

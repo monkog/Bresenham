@@ -12,7 +12,7 @@ namespace SimplePaintTests.Shapes
 		[TestInitialize]
 		public void Initialize()
 		{
-			_unitUnderTest = new CustomEllipse(new Point(2, 5));
+			_unitUnderTest = new CustomEllipse(new Point(12, 15));
 		}
 
 		[TestMethod]
@@ -41,6 +41,18 @@ namespace SimplePaintTests.Shapes
 			_unitUnderTest.Deselect();
 
 			Assert.IsFalse(_unitUnderTest.IsSelected);
+		}
+
+		[DataTestMethod]
+		[DataRow(1, 1, 100, 100, true)]
+		[DataRow(-1, -1, 100, 100, true)]
+		[DataRow(-10, -1, 100, 100, false)]
+		[DataRow(100, -1, 100, 100, false)]
+		public void CanDrag_Deltas_CanDrag(int deltaX, int deltaY, int xBound, int yBound, bool expected)
+		{
+			var canDrag = _unitUnderTest.CanDrag(deltaX, deltaY, xBound, yBound);
+
+			Assert.AreEqual(expected, canDrag);
 		}
 	}
 }

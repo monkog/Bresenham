@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -9,8 +8,6 @@ namespace SimplePaint
 {
 	public partial class FigureDesigner : Form
 	{
-		private const int Delta = 10;
-
 		private readonly ShapeManager _shapeManager = new ShapeManager();
 
 		private readonly CursorManager _cursorManager = new CursorManager();
@@ -571,7 +568,7 @@ namespace SimplePaint
 
 			var selectedFigure = _shapeManager.SelectedFigure;
 			var vertex = selectedFigure.SelectedVertex;
-			if (CanDragVertex(deltaX, deltaY)) return true;
+			if (!vertex.CanDrag(deltaX, deltaY, drawingArea.Bounds.Width, drawingArea.Bounds.Height)) return true;
 
 			Cursor = Cursors.Hand;
 			selectedFigure.MoveSelectedVertex(deltaX, deltaY);
@@ -585,32 +582,15 @@ namespace SimplePaint
 		{
 			var deltaX = point.X - _mouseLastPosition.X;
 			var deltaY = point.Y - _mouseLastPosition.Y;
+			var selectedFigure = _shapeManager.SelectedFigure;
 
-			if (CanDragFigure(deltaX, deltaY)) return false;
+			if (!selectedFigure.CanDrag(deltaX, deltaY, drawingArea.Bounds.Width, drawingArea.Bounds.Height)) return false;
 
-			_shapeManager.SelectedFigure.Move(deltaX, deltaY);
+			selectedFigure.Move(deltaX, deltaY);
 
 			_mouseLastPosition = point;
 			Cursor = Cursors.SizeAll;
 			return true;
-		}
-
-		private bool CanDragVertex(int deltaX, int deltaY)
-		{
-			var vertex = _shapeManager.SelectedFigure.SelectedVertex;
-			return vertex.Position.X - deltaX > drawingArea.Bounds.Width - Delta
-			       || vertex.Position.Y - deltaY > drawingArea.Bounds.Height - Delta
-				   || vertex.Position.X - deltaX < Delta
-				   || vertex.Position.Y - deltaY < Delta;
-		}
-
-		private bool CanDragFigure(int deltaX, int deltaY)
-		{
-			var selectedFigure = _shapeManager.SelectedFigure;
-			return selectedFigure.MaxX + deltaX > drawingArea.Bounds.Width - Delta
-				   || selectedFigure.MinX + deltaX < Delta
-				   || selectedFigure.MaxY + deltaY > drawingArea.Bounds.Height - Delta
-				   || selectedFigure.MinY + deltaY < Delta;
 		}
 
 		#endregion Private Methods

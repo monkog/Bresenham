@@ -6,11 +6,13 @@ namespace SimplePaint.Shapes
     /// Ellipse representing the vertex
     /// </summary>
     public class CustomEllipse : IShape
-    {
-        /// <summary>
-        /// Gets or sets the position of the ellipse.
-        /// </summary>
-        public Point Position { get; set; }
+	{
+		private const int Delta = 10;
+
+		/// <summary>
+		/// Gets or sets the position of the ellipse.
+		/// </summary>
+		public Point Position { get; set; }
 
         /// <summary>
         /// Gets the value determining whether this vertex is selected.
@@ -40,6 +42,22 @@ namespace SimplePaint.Shapes
 		public void Deselect()
 		{
 			IsSelected = false;
+		}
+
+		/// <summary>
+		/// Determines whether this vertex can be dragged by the given deltas.
+		/// </summary>
+		/// <param name="deltaX">Change in x coordinate.</param>
+		/// <param name="deltaY">Change in y coordinate.</param>
+		/// <param name="xBound">Max x position that can be set.</param>
+		/// <param name="yBound">Max y position that can be set.</param>
+		/// <returns>True if this vertex can be dragged, false otherwise.</returns>
+		public bool CanDrag(int deltaX, int deltaY, int xBound, int yBound)
+		{
+			return Position.X + deltaX > Delta
+			       && Position.X + deltaX < xBound - Delta
+			       && Position.Y + deltaY < yBound - Delta
+			       && deltaY + Position.Y > Delta;
 		}
 
 		/// <inheritdoc/>

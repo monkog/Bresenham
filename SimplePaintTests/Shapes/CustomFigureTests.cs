@@ -224,5 +224,17 @@ namespace SimplePaintTests.Shapes
 			Assert.AreEqual(vertex, result);
 			Assert.IsTrue(result.IsSelected);
 		}
+
+		[DataTestMethod]
+		[DataRow(-10, -10, false)]
+		[DataRow(10, 10, false)]
+		[DataRow(40, 40, true)]
+		[DataRow(400, 400, false)]
+		public void CanDrag_Deltas_CanDrag(int deltaX, int deltaY, bool expected)
+		{
+			var result = _unitUnderTest.CanDrag(deltaX, deltaY, 100, 100);
+
+			Assert.AreEqual(expected, result);
+		}
 	}
 }
