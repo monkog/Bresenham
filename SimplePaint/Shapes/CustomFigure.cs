@@ -180,6 +180,29 @@ namespace SimplePaint.Shapes
 		}
 
 		/// <summary>
+		/// Gets the line which contains the given point.
+		/// </summary>
+		/// <param name="point">The point.</param>
+		/// <returns>The line containing the point or null if no line contains this point.</returns>
+		public CustomLine GetLineContainingPoint(Point point)
+		{
+			foreach (var line in FigureShapes.OfType<CustomLine>())
+			{
+				var lineLength = Math.Sqrt((line.StartPoint.X - line.EndPoint.X) * (line.StartPoint.X - line.EndPoint.X)
+								   + (line.StartPoint.Y - line.EndPoint.Y) * (line.StartPoint.Y - line.EndPoint.Y));
+				var distanceFromStart = Math.Sqrt((point.X - line.StartPoint.X) * (point.X - line.StartPoint.X)
+								   + (point.Y - line.StartPoint.Y) * (point.Y - line.StartPoint.Y));
+				var distanceFromEnd = Math.Sqrt((point.X - line.EndPoint.X) * (point.X - line.EndPoint.X)
+								   + (point.Y - line.EndPoint.Y) * (point.Y - line.EndPoint.Y));
+
+				if (!(distanceFromStart + distanceFromEnd < lineLength + 2) || !(distanceFromStart + distanceFromEnd > lineLength - 2)) continue;
+				return line;
+			}
+
+			return null;
+		}
+
+		/// <summary>
 		/// Determines whether the specified point is vertex.
 		/// </summary>
 		/// <param name="point">The point.</param>
@@ -223,9 +246,9 @@ namespace SimplePaint.Shapes
 		public bool CanDrag(int deltaX, int deltaY, int xBound, int yBound)
 		{
 			return MaxX + deltaX < xBound - Delta
-			       && MinX + deltaX > Delta
-			       && MaxY + deltaY < yBound - Delta
-			       && MinY + deltaY > Delta;
+				   && MinX + deltaX > Delta
+				   && MaxY + deltaY < yBound - Delta
+				   && MinY + deltaY > Delta;
 		}
 
 		/// <summary>

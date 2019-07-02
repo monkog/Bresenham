@@ -180,15 +180,18 @@ namespace SimplePaint
 			_mouseUpPosition = new Point(e.X, e.Y);
 			_shapeManager.DeselectFigures();
 
-			CustomFigure figure;
-			CustomLine line;
-
 			// Add vertex to existing figure.
-			if (!_doDrawFigure && _doAddVertex && _shapeManager.Figures.Any() && IsPointOnBorder(_mouseUpPosition, out figure, out line))
+			if (!_doDrawFigure && _doAddVertex)
 			{
-				figure.AddVertexOnLine(_mouseUpPosition, line);
-				drawingArea.Refresh();
-				return;
+				foreach (var figure in _shapeManager.Figures)
+				{
+					var line = figure.GetLineContainingPoint(_mouseUpPosition);
+					if (line == null) continue;
+
+					figure.AddVertexOnLine(_mouseUpPosition, line);
+					drawingArea.Refresh();
+					return;
+				}
 			}
 
 			if (_doDrawFigure && DrawFigure()) return;
@@ -369,38 +372,7 @@ namespace SimplePaint
 
 			return (Math.Abs(point.X - vertex.Position.X) < 10 && Math.Abs(point.Y - vertex.Position.Y) < 10);
 		}
-		/// <summary>
-		/// Determines whether [is point on border].
-		/// </summary>
-		/// <param name="point">The point.</param>
-		/// <param name="outFigure">The out figure.</param>
-		/// <param name="outLine">The out line.</param>
-		/// <returns>True if the hit point was on a line</returns>
-		private bool IsPointOnBorder(Point point, out CustomFigure outFigure, out CustomLine outLine)
-		{
-			outFigure = null;
-			outLine = null;
 
-			foreach (CustomFigure figure in _shapeManager.Figures)
-				foreach (CustomLine line in from shape in figure.FigureShapes
-											where shape.GetType() == typeof(CustomLine)
-											select shape as CustomLine)
-				{
-					double ab = Math.Sqrt((line.StartPoint.X - line.EndPoint.X) * (line.StartPoint.X - line.EndPoint.X)
-						+ (line.StartPoint.Y - line.EndPoint.Y) * (line.StartPoint.Y - line.EndPoint.Y));
-					double ac = Math.Sqrt((point.X - line.StartPoint.X) * (point.X - line.StartPoint.X)
-						+ (point.Y - line.StartPoint.Y) * (point.Y - line.StartPoint.Y));
-					double bc = Math.Sqrt((point.X - line.EndPoint.X) * (point.X - line.EndPoint.X)
-						+ (point.Y - line.EndPoint.Y) * (point.Y - line.EndPoint.Y));
-
-					if (!(ac + bc < ab + 2) || !(ac + bc > ab - 2)) continue;
-					outFigure = figure;
-					outLine = line;
-					return true;
-				}
-
-			return false;
-		}
 		/// <summary>
 		/// Sets the button states.
 		/// </summary>
@@ -431,21 +403,20 @@ namespace SimplePaint
 		/// <returns>True if such a line was found, false otherwise</returns>
 		private bool SelectLineForMultisampling(Point location)
 		{
-			CustomLine outLine;
-			CustomFigure outFigure;
+			foreach (var figure in _shapeManager.Figures)
+			{
+				var line = figure.GetLineContainingPoint(location);
+				if (line == null) continue;
 
-			foreach (CustomFigure figure in _shapeManager.Figures)
-				if (IsPointOnBorder(location, out outFigure, out outLine))
-				{
-					if (_multisamplingFigure != null)
-						_multisamplingFigure.MultisamplingLine = null;
+				if (_multisamplingFigure != null) _multisamplingFigure.MultisamplingLine = null;
 
-					_multisamplingFigure = outFigure;
-					_selectedLine = outLine;
-					figure.MultisamplingLine = outLine;
-					drawingArea.Refresh();
-					return true;
-				}
+				_multisamplingFigure = figure;
+				_selectedLine = line;
+				figure.MultisamplingLine = line;
+				drawingArea.Refresh();
+				return true;
+			}
+
 			return false;
 		}
 		/// <summary>
@@ -455,14 +426,13 @@ namespace SimplePaint
 		/// <returns>True if the cursor has been changed, false otherwise</returns>
 		private bool SetCursorImage(Point location)
 		{
-			CustomFigure outFigure;
-			CustomLine outLine;
+			var isCursorOverFigure = _shapeManager.Figures.Any(figure => figure.GetLineContainingPoint(location) != null);
 
-			if (_doChangeColor && IsPointOnBorder(location, out outFigure, out outLine))
+			if (_doChangeColor && isCursorOverFigure)
 			{
 				Cursor = _cursorManager.BucketCursor;
 			}
-			else if (_doChangeThickness && _shapeManager.Figures.Any(figure => IsPointOnBorder(location, out outFigure, out outLine)))
+			else if (_doChangeThickness && isCursorOverFigure)
 			{
 				Cursor = _cursorManager.PenCursor;
 				return true;
@@ -489,13 +459,15 @@ namespace SimplePaint
 		/// <param name="location">The location.</param>
 		private void ChangeFigureThickness(Point location)
 		{
-			CustomFigure outFigure;
-			CustomLine outLine;
+			foreach (var figure in _shapeManager.Figures)
+			{
+				var line = figure.GetLineContainingPoint(location);
+				if (line == null) continue;
 
-			if (!IsPointOnBorder(location, out outFigure, out outLine)) return;
-
-			outFigure.StrokeThickness = _strokeThickness;
-			drawingArea.Refresh();
+				figure.StrokeThickness = _strokeThickness;
+				drawingArea.Refresh();
+				return;
+			}
 		}
 		/// <summary>
 		/// Changes the color of the chosen figure.
@@ -504,14 +476,17 @@ namespace SimplePaint
 		/// <returns></returns>
 		private bool ChangeFigureColor(Point location)
 		{
-			CustomFigure outFigure;
-			CustomLine outLine;
+			foreach (var figure in _shapeManager.Figures)
+			{
+				var line = figure.GetLineContainingPoint(location);
+				if (line == null) continue;
 
-			if (!IsPointOnBorder(location, out outFigure, out outLine)) return false;
+				figure.FigureColor = colorPictureBox.BackColor;
+				drawingArea.Refresh();
+				return true;
+			}
 
-			outFigure.FigureColor = colorPictureBox.BackColor;
-			drawingArea.Refresh();
-			return true;
+			return false;
 		}
 		/// <summary>
 		/// Draws the figure.

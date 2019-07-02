@@ -236,5 +236,40 @@ namespace SimplePaintTests.Shapes
 
 			Assert.AreEqual(expected, result);
 		}
+
+		[TestMethod]
+		public void GetLineContainingPoint_NoLineContainsPoint_Null()
+		{
+			var line = new CustomLine(new Point(1, 2), new Point(1, 4));
+			_unitUnderTest.FigureShapes.AddLast(line);
+
+			var result = _unitUnderTest.GetLineContainingPoint(new Point(7, 9));
+
+			Assert.IsNull(result);
+		}
+
+		[TestMethod]
+		public void GetLineContainingPoint_LineContainsPoint_Line()
+		{
+			var line = new CustomLine(new Point(1, 2), new Point(1, 4));
+			_unitUnderTest.FigureShapes.AddLast(line);
+
+			var result = _unitUnderTest.GetLineContainingPoint(new Point(1, 3));
+
+			Assert.IsNotNull(result);
+			Assert.AreEqual(line, result);
+		}
+
+		[TestMethod]
+		public void GetLineContainingPoint_PointCloseToLine_Line()
+		{
+			var line = new CustomLine(new Point(1, 2), new Point(1, 4));
+			_unitUnderTest.FigureShapes.AddLast(line);
+
+			var result = _unitUnderTest.GetLineContainingPoint(new Point(2, 3));
+
+			Assert.IsNotNull(result);
+			Assert.AreEqual(line, result);
+		}
 	}
 }
