@@ -54,8 +54,8 @@ namespace SimplePaintTests.Shapes
 		}
 
 		[DataTestMethod]
-		[DataRow(-20, 20)]
-		[DataRow(-21, 21)]
+		[DataRow(-20, 20, DisplayName = "First vertex")]
+		[DataRow(-21, 21, DisplayName = "Close to first vertex")]
 		public void IsVertex_VertexPoint_True(int x, int y)
 		{
 			var result = _unitUnderTest.IsVertex(new Point(x, y), out var vertex);
@@ -270,6 +270,28 @@ namespace SimplePaintTests.Shapes
 
 			Assert.IsNotNull(result);
 			Assert.AreEqual(line, result);
+		}
+
+		[DataTestMethod]
+		[DataRow(100, 100, DisplayName = "Outside bounding box")]
+		[DataRow(0, 20, DisplayName = "Outside figure")]
+		[DataRow(0, -20, DisplayName = "On the edge of the shape")]
+		[DataRow(20, -20, DisplayName = "Other vertex")]
+		public void WillCloseFigure_NotFirstVertexPoint_False(int x, int y)
+		{
+			var result = _unitUnderTest.WillCloseFigure(new Point(x, y));
+
+			Assert.IsFalse(result);
+		}
+
+		[DataTestMethod]
+		[DataRow(-20, 20, DisplayName = "First vertex")]
+		[DataRow(-21, 21, DisplayName = "Close to first vertex")]
+		public void WillCloseFigure_FirstVertexPoint_True(int x, int y)
+		{
+			var result = _unitUnderTest.WillCloseFigure(new Point(x, y));
+
+			Assert.IsTrue(result);
 		}
 	}
 }

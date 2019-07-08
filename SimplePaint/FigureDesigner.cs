@@ -361,17 +361,6 @@ namespace SimplePaint
 			_multisamplingFigure = null;
 			_doMultisample = false;
 		}
-		/// <summary>
-		/// Determines whether [is figure complete] after placing new vertex.
-		/// </summary>
-		/// <param name="point">Position of placed vertex.</param>
-		/// <returns>True if the figure is closed, otherwise false</returns>
-		private bool IsFigureComplete(Point point)
-		{
-			var vertex = _currentFigure.FirstVertex;
-
-			return (Math.Abs(point.X - vertex.Position.X) < 10 && Math.Abs(point.Y - vertex.Position.Y) < 10);
-		}
 
 		/// <summary>
 		/// Sets the button states.
@@ -500,7 +489,7 @@ namespace SimplePaint
 			}
 			else
 			{
-				if (IsFigureComplete(_mouseUpPosition))
+				if (_currentFigure.WillCloseFigure(_mouseUpPosition))
 				{
 					if (_currentFigure.Vertices.Count < 3) return true;
 

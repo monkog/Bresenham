@@ -289,6 +289,16 @@ namespace SimplePaint.Shapes
 			UpdateBoundingBox();
 		}
 
+		/// <summary>
+		/// Determines whether adding a vertex in the given position will result in closing this figure.
+		/// </summary>
+		/// <param name="point"></param>
+		/// <returns>True if adding a vertex in the given position will close the figure, otherwise false.</returns>
+		public bool WillCloseFigure(Point point)
+		{
+			return FindVertexAtPoint(point) == FirstVertex;
+		}
+
 		private void UpdateLinesPositions(LinkedListNode<IShape> node, int deltaX, int deltaY)
 		{
 			var previousLine = node.Previous?.Value as CustomLine ?? FigureShapes.Last.Value as CustomLine;
