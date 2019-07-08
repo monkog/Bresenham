@@ -130,4 +130,22 @@
   <data name="ValueMustBeInRange" xml:space="preserve">
     <value>Value must be in range 1 - 10</value>
   </data>
+  <data name="AddVertex" xml:space="preserve">
+    <value>ADD VERTEX</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>CANCEL</value>
+  </data>
+  <data name="ChangeColor" xml:space="preserve">
+    <value>CHANGE COLOR</value>
+  </data>
+  <data name="ChangeThickness" xml:space="preserve">
+    <value>CHANGE SIZE</value>
+  </data>
+  <data name="DrawFigure" xml:space="preserve">
+    <value>DRAW FIGURE</value>
+  </data>
+  <data name="Multisampling" xml:space="preserve">
+    <value>MULTISAMPLING</value>
+  </data>
 </root>

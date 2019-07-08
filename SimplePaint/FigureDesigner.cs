@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using SimplePaint.Properties;
 using SimplePaint.Shapes;
 
 namespace SimplePaint
@@ -11,6 +12,8 @@ namespace SimplePaint
 		private readonly ShapeManager _shapeManager = new ShapeManager();
 
 		private readonly CursorManager _cursorManager = new CursorManager();
+
+		private FormState _formState;
 
 		public FigureDesigner()
 		{
@@ -28,10 +31,6 @@ namespace SimplePaint
 		/// </summary>
 		private int _strokeThickness;
 		/// <summary>
-		/// Is the user currently adding a vertex
-		/// </summary>
-		private bool _doAddVertex;
-		/// <summary>
 		/// The last mouse down position
 		/// </summary>
 		private Point _mouseDownPosition;
@@ -44,20 +43,6 @@ namespace SimplePaint
 		/// </summary>
 		private Point _mouseLastPosition;
 		/// <summary>
-		/// Is the user drawing a figure
-		/// </summary>
-		private bool _doDrawFigure;
-
-		/// <summary>
-		/// Is the user changing color
-		/// </summary>
-		private bool _doChangeColor;
-
-		/// <summary>
-		/// Is the user changing thickness
-		/// </summary>
-		private bool _doChangeThickness;
-		/// <summary>
 		/// The selected line
 		/// </summary>
 		private CustomLine _selectedLine;
@@ -65,10 +50,7 @@ namespace SimplePaint
 		/// The multisampling figure
 		/// </summary>
 		private CustomFigure _multisamplingFigure;
-		/// <summary>
-		/// Is the user doing multisample
-		/// </summary>
-		private bool _doMultisample;
+
 		#endregion Private Members
 
 		private void FigureDesigner_Load(object sender, EventArgs e)
@@ -84,12 +66,12 @@ namespace SimplePaint
 			_mouseDownPosition = new Point(e.X, e.Y);
 			_mouseLastPosition = _mouseDownPosition;
 
-			if (_shapeManager.SelectedFigure != null || _doDrawFigure || _doAddVertex || _doChangeColor || _doChangeThickness)
+			if (_shapeManager.SelectedFigure != null || !(_formState == FormState.Default || _formState == FormState.Multisampling))
 				return;
 
 			_shapeManager.SelectFigure(e.Location);
 
-			if (_doMultisample && SelectLineForMultisampling(e.Location)) return;
+			if (_formState == FormState.Multisampling && SelectLineForMultisampling(e.Location)) return;
 
 			if (_shapeManager.SelectedFigure == null) return;
 			Cursor = Cursors.SizeAll;
@@ -98,15 +80,15 @@ namespace SimplePaint
 
 		private void MouseMoveOccured(object sender, MouseEventArgs e)
 		{
-			Cursor = (_doAddVertex || _doDrawFigure) ? Cursors.Cross : Cursors.Default;
+			Cursor = (_formState == FormState.AddVertex || _formState == FormState.DrawFigure) ? Cursors.Cross : Cursors.Default;
 
-			if (_shapeManager.SelectedFigure == null && !_doDrawFigure && !_doAddVertex && SetCursorImage(e.Location)) return;
+			if (_shapeManager.SelectedFigure == null && _formState != FormState.DrawFigure && _formState != FormState.AddVertex && SetCursorImage(e.Location)) return;
 			if (_shapeManager.SelectedFigure != null && _shapeManager.SelectedFigure.Vertices.Any(v => v.IsSelected) && MoveVertex(e.Location)) return;
 			if (_shapeManager.SelectedFigure != null && !MoveFigure(e.Location)) return;
 
 			// Proceed when drawing current figure is in progress. 
 			// Draws a temporary line between the last vertex and current mouse position.
-			if (_doDrawFigure && _currentFigure != null)
+			if (_formState == FormState.DrawFigure && _currentFigure != null)
 			{
 				if (_currentFigure.FigureShapes.Last() is CustomLine)
 					_currentFigure.FigureShapes.Remove(_currentFigure.FigureShapes.Last());
@@ -122,7 +104,7 @@ namespace SimplePaint
 			_shapeManager.DeselectFigures();
 
 			// Add vertex to existing figure.
-			if (!_doDrawFigure && _doAddVertex)
+			if (_formState == FormState.AddVertex)
 			{
 				foreach (var figure in _shapeManager.Figures)
 				{
@@ -135,11 +117,11 @@ namespace SimplePaint
 				}
 			}
 
-			if (_doDrawFigure && DrawFigure()) return;
+			if (_formState == FormState.DrawFigure && DrawFigure()) return;
 
-			if (_doChangeColor && ChangeFigureColor(e.Location)) return;
+			if (_formState == FormState.ChangeColor && ChangeFigureColor(e.Location)) return;
 
-			if (_doChangeThickness) ChangeFigureThickness(e.Location);
+			if (_formState == FormState.ChangeThickness) ChangeFigureThickness(e.Location);
 		}
 
 		/// <summary>
@@ -155,7 +137,7 @@ namespace SimplePaint
 			if (_shapeManager.Figures.Any())
 				foreach (CustomFigure figure in _shapeManager.Figures)
 				{
-					if (_doMultisample && _multisamplingFigure == figure && _selectedLine != null)
+					if (_formState == FormState.Multisampling && _multisamplingFigure == figure && _selectedLine != null)
 					{
 						foreach (IShape shape in figure.FigureShapes)
 							if (shape.GetType() == typeof(CustomLine))
@@ -175,17 +157,14 @@ namespace SimplePaint
 
 		private void drawFigureButton_Click(object sender, EventArgs e)
 		{
-			if (_doDrawFigure)
+			if (_formState == FormState.DrawFigure)
 			{
-				Cursor = Cursors.Default;
-				SetButtonStates(addVertex: false, drawFigure: false, changeColor: false
-					, changeThickness: false, doMultisampling: false);
+				SetFormState(FormState.Default);
 				_currentFigure = null;
 				return;
 			}
 
-			SetButtonStates(addVertex: false, drawFigure: true, changeColor: false
-				, changeThickness: false, doMultisampling: false);
+			SetFormState(FormState.DrawFigure);
 			Cursor = Cursors.Cross;
 		}
 		/// <summary>
@@ -195,23 +174,19 @@ namespace SimplePaint
 		/// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
 		private void addVertexButton_Click(object sender, EventArgs e)
 		{
-			if (_doAddVertex)
+			if (_formState == FormState.AddVertex)
 			{
-				Cursor = Cursors.Default;
-				SetButtonStates(addVertex: false, drawFigure: false, changeColor: false
-					, changeThickness: false, doMultisampling: false);
+				SetFormState(FormState.Default);
 				return;
 			}
 
-			if (!_shapeManager.Figures.Any() || (_doDrawFigure && _currentFigure != null))
+			if (!_shapeManager.Figures.Any() || (_formState == FormState.DrawFigure && _currentFigure != null))
 			{
 				MessageBox.Show("You have to finish drawing at least one figure to use this functionality.", "Don't do that!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 				return;
 			}
 
-			SetButtonStates(addVertex: true, drawFigure: false, changeColor: false
-				, changeThickness: false, doMultisampling: false);
-
+			SetFormState(FormState.AddVertex);
 			Cursor = Cursors.Cross;
 		}
 		/// <summary>
@@ -230,15 +205,15 @@ namespace SimplePaint
 		/// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
 		private void changeColorButton_Click(object sender, EventArgs e)
 		{
-			if (_doDrawFigure && _currentFigure != null && _currentFigure.Vertices.Any())
+			if (_formState == FormState.DrawFigure && _currentFigure != null && _currentFigure.Vertices.Any())
 			{
 				MessageBox.Show("You have to finish drawing to use this functionality.", "Don't do that!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 				return;
 			}
 
-			if (_doChangeColor && !_doDrawFigure)
+			if (_formState == FormState.ChangeColor)
 			{
-				SetButtonStates(false, false, false, false, false);
+				SetFormState(FormState.Default);
 				return;
 			}
 
@@ -248,7 +223,7 @@ namespace SimplePaint
 			colorPictureBox.BackColor = colorDialog.Color;
 			drawingArea.Refresh();
 
-			if (!_doDrawFigure) SetButtonStates(false, false, true, false, false);
+			if (_formState != FormState.DrawFigure) SetFormState(FormState.ChangeColor);
 		}
 		/// <summary>
 		/// Handles the Click event of the changeSizeButton control.
@@ -257,25 +232,22 @@ namespace SimplePaint
 		/// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
 		private void changeSizeButton_Click(object sender, EventArgs e)
 		{
-			if (_doDrawFigure && _currentFigure != null && _currentFigure.Vertices.Any())
+			if (_formState == FormState.DrawFigure && _currentFigure != null && _currentFigure.Vertices.Any())
 			{
 				MessageBox.Show("You have to finish drawing to use this functionality.", "Don't do that!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 				return;
 			}
 
-			if (_doChangeThickness)
+			if (_formState == FormState.ChangeThickness)
 			{
-				SetButtonStates(addVertex: false, changeColor: false, changeThickness: false
-					, drawFigure: false, doMultisampling: false);
+				SetFormState(FormState.Default);
 				return;
 			}
 
 			var enterValueWindow = new EnterValueWindow();
 			enterValueWindow.ShowDialog();
 
-			if (!_doDrawFigure)
-				SetButtonStates(addVertex: false, drawFigure: false, changeColor: false
-					, changeThickness: true, doMultisampling: false);
+			if (_formState != FormState.DrawFigure) SetFormState(FormState.ChangeThickness);
 
 			_strokeThickness = enterValueWindow.LineThickness;
 			sizeLabel.Text = "CURRENT SIZE: " + enterValueWindow.LineThickness + " px";
@@ -290,14 +262,8 @@ namespace SimplePaint
 		/// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
 		private void multisamplingButton_Click(object sender, EventArgs e)
 		{
-			if (_doMultisample)
-			{
-				SetButtonStates(addVertex: false, drawFigure: false, changeColor: false
-					, changeThickness: false, doMultisampling: false);
-				return;
-			}
-			SetButtonStates(addVertex: false, drawFigure: false, changeColor: false
-				, changeThickness: false, doMultisampling: true);
+			var state = _formState == FormState.Multisampling ? FormState.Default : FormState.Multisampling;
+			SetFormState(state);
 		}
 
 		#region Private Methods
@@ -306,10 +272,7 @@ namespace SimplePaint
 		/// </summary>
 		private void SetDefaultSettings()
 		{
-			Cursor = Cursors.Default;
-
-			SetButtonStates(addVertex: false, drawFigure: false, changeColor: false
-				, changeThickness: false, doMultisampling: false);
+			SetFormState(FormState.Default);
 
 			_shapeManager.Figures.Clear();
 			_currentFigure = null;
@@ -326,30 +289,40 @@ namespace SimplePaint
 			_shapeManager.DeselectFigures();
 			_selectedLine = null;
 			_multisamplingFigure = null;
-			_doMultisample = false;
 		}
 
-		/// <summary>
-		/// Sets the button states.
-		/// </summary>
-		/// <param name="addVertex">if set to <c>true</c> [add vertex].</param>
-		/// <param name="drawFigure">if set to <c>true</c> [draw figure].</param>
-		/// <param name="changeColor">if set to <c>true</c> [change color].</param>
-		/// <param name="changeThickness">if set to <c>true</c> [change thickness].</param>
-		/// <param name="doMultisampling">if set to <c>true</c> [do multisampling].</param>
-		private void SetButtonStates(bool addVertex, bool drawFigure, bool changeColor
-			, bool changeThickness, bool doMultisampling)
+		private void SetFormState(FormState state)
 		{
-			_doAddVertex = addVertex;
-			_doDrawFigure = drawFigure;
-			_doChangeColor = changeColor;
-			_doChangeThickness = changeThickness;
-			_doMultisample = doMultisampling;
-			changeColorButton.Text = changeColor ? "CANCEL" : "CHANGE COLOR";
-			addVertexButton.Text = addVertex ? "CANCEL" : "ADD VERTEX";
-			drawFigureButton.Text = drawFigure ? "CANCEL" : "DRAW FIGURE";
-			changeSizeButton.Text = changeThickness ? "CANCEL" : "CHANGE SIZE";
-			multisamplingButton.Text = doMultisampling ? "CANCEL" : "MULTISAMPLING";
+			_formState = state;
+			changeColorButton.Text = Resources.ChangeColor;
+			addVertexButton.Text = Resources.AddVertex;
+			drawFigureButton.Text = Resources.DrawFigure;
+			changeSizeButton.Text = Resources.ChangeThickness;
+			multisamplingButton.Text = Resources.Multisampling;
+
+			switch (state)
+			{
+				case FormState.DrawFigure:
+					drawFigureButton.Text = Resources.Cancel;
+					break;
+				case FormState.AddVertex:
+					addVertexButton.Text = Resources.Cancel;
+					break;
+				case FormState.ChangeColor:
+					changeColorButton.Text = Resources.Cancel;
+					break;
+				case FormState.Multisampling:
+					multisamplingButton.Text = Resources.Cancel;
+					break;
+				case FormState.ChangeThickness:
+					changeSizeButton.Text = Resources.Cancel;
+					break;
+				case FormState.Default:
+					Cursor = Cursors.Default;
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(state), state, null);
+			}
 		}
 
 		/// <summary>
@@ -384,16 +357,16 @@ namespace SimplePaint
 		{
 			var isCursorOverFigure = _shapeManager.Figures.Any(figure => figure.GetLineContainingPoint(location) != null);
 
-			if (_doChangeColor && isCursorOverFigure)
+			if (_formState == FormState.ChangeColor && isCursorOverFigure)
 			{
 				Cursor = _cursorManager.BucketCursor;
 			}
-			else if (_doChangeThickness && isCursorOverFigure)
+			else if (_formState == FormState.ChangeThickness && isCursorOverFigure)
 			{
 				Cursor = _cursorManager.PenCursor;
 				return true;
 			}
-			else if (!_doChangeColor && !_doChangeThickness)
+			else if (_formState != FormState.ChangeColor && _formState != FormState.ChangeThickness)
 			{
 				if (_shapeManager.Figures.Any(figure => figure.IsVertex(location, out _)))
 				{

@@ -61,6 +61,15 @@ namespace SimplePaint.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ADD VERTEX.
+        /// </summary>
+        internal static string AddVertex {
+            get {
+                return ResourceManager.GetString("AddVertex", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap bucket {
@@ -71,11 +80,56 @@ namespace SimplePaint.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to CANCEL.
+        /// </summary>
+        internal static string Cancel {
+            get {
+                return ResourceManager.GetString("Cancel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CHANGE COLOR.
+        /// </summary>
+        internal static string ChangeColor {
+            get {
+                return ResourceManager.GetString("ChangeColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CHANGE SIZE.
+        /// </summary>
+        internal static string ChangeThickness {
+            get {
+                return ResourceManager.GetString("ChangeThickness", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DRAW FIGURE.
+        /// </summary>
+        internal static string DrawFigure {
+            get {
+                return ResourceManager.GetString("DrawFigure", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid argument!.
         /// </summary>
         internal static string InvalidArgument {
             get {
                 return ResourceManager.GetString("InvalidArgument", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MULTISAMPLING.
+        /// </summary>
+        internal static string Multisampling {
+            get {
+                return ResourceManager.GetString("Multisampling", resourceCulture);
             }
         }
         
