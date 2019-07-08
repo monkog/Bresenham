@@ -40,7 +40,7 @@ namespace SimplePaintTests
 			_unitUnderTest.Figures.Add(_figure);
 
 			_unitUnderTest.SelectFigure(new Point(0, 0));
-			
+
 			Assert.AreEqual(_figure, _unitUnderTest.SelectedFigure);
 			Assert.IsTrue(_figure.IsSelected);
 		}
@@ -55,6 +55,23 @@ namespace SimplePaintTests
 
 			Assert.IsNull(_unitUnderTest.SelectedFigure);
 			Assert.IsFalse(_figure.IsSelected);
+		}
+
+		[TestMethod]
+		public void MultisamplingFigure_FigureWithLineSelected_Figure()
+		{
+			_unitUnderTest.Figures.Add(_figure);
+			_figure.MultisamplingLine = new CustomLine(new Point(0, 0), new Point(100, 100));
+
+			Assert.AreEqual(_figure, _unitUnderTest.MultisamplingFigure);
+		}
+
+		[TestMethod]
+		public void MultisamplingFigure_NoFigureWithLineSelected_Null()
+		{
+			_unitUnderTest.Figures.Add(_figure);
+
+			Assert.IsNull(_unitUnderTest.MultisamplingFigure);
 		}
 	}
 }

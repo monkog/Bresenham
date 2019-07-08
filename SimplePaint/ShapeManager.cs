@@ -17,6 +17,11 @@ namespace SimplePaint
 		/// </summary>
 		public CustomFigure SelectedFigure => Figures.SingleOrDefault(f => f.IsSelected);
 
+		/// <summary>
+		/// Gets the selected figure for multisampling.
+		/// </summary>
+		public CustomFigure MultisamplingFigure => Figures.SingleOrDefault(f => f.MultisamplingLine != null);
+
 		public ShapeManager()
 		{
 			Figures = new List<CustomFigure>();

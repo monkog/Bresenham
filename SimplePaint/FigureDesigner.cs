@@ -15,6 +15,14 @@ namespace SimplePaint
 
 		private FormState _formState;
 
+		private Point _mouseDownPosition;
+
+		private Point _mouseUpPosition;
+
+		private Point _mouseLastPosition;
+
+		private int _strokeThickness;
+
 		public FigureDesigner()
 		{
 			InitializeComponent();
@@ -26,30 +34,6 @@ namespace SimplePaint
 		/// The currently drawn figure
 		/// </summary>
 		private CustomFigure _currentFigure;
-		/// <summary>
-		/// The current stroke thickness
-		/// </summary>
-		private int _strokeThickness;
-		/// <summary>
-		/// The last mouse down position
-		/// </summary>
-		private Point _mouseDownPosition;
-		/// <summary>
-		/// The last mouse up position
-		/// </summary>
-		private Point _mouseUpPosition;
-		/// <summary>
-		/// The last mouse position
-		/// </summary>
-		private Point _mouseLastPosition;
-		/// <summary>
-		/// The selected line
-		/// </summary>
-		private CustomLine _selectedLine;
-		/// <summary>
-		/// The multisampling figure
-		/// </summary>
-		private CustomFigure _multisamplingFigure;
 
 		#endregion Private Members
 
@@ -134,25 +118,27 @@ namespace SimplePaint
 			if (_currentFigure != null)
 				foreach (IShape shape in _currentFigure.FigureShapes)
 					shape.Draw(e.Graphics, _currentFigure.FigureColor, _currentFigure.StrokeThickness);
-			if (_shapeManager.Figures.Any())
-				foreach (CustomFigure figure in _shapeManager.Figures)
+			if (!_shapeManager.Figures.Any()) return;
+			var multisamplingFigure = _shapeManager.MultisamplingFigure;
+
+			foreach (CustomFigure figure in _shapeManager.Figures)
+			{
+				if (_formState == FormState.Multisampling && multisamplingFigure == figure)
 				{
-					if (_formState == FormState.Multisampling && _multisamplingFigure == figure && _selectedLine != null)
-					{
-						foreach (IShape shape in figure.FigureShapes)
-							if (shape.GetType() == typeof(CustomLine))
-							{
-								CustomLine line = shape as CustomLine;
-								var color = line == _selectedLine ? figure.MultisamplingColor : figure.FigureColor;
-								shape.Draw(e.Graphics, color, figure.StrokeThickness);
-							}
-							else
-								shape.Draw(e.Graphics, figure.FigureColor, figure.StrokeThickness);
-					}
-					else
-						foreach (IShape shape in figure.FigureShapes)
+					foreach (IShape shape in figure.FigureShapes)
+						if (shape.GetType() == typeof(CustomLine))
+						{
+							CustomLine line = shape as CustomLine;
+							var color = line == multisamplingFigure.MultisamplingLine ? figure.MultisamplingColor : figure.FigureColor;
+							shape.Draw(e.Graphics, color, figure.StrokeThickness);
+						}
+						else
 							shape.Draw(e.Graphics, figure.FigureColor, figure.StrokeThickness);
 				}
+				else
+					foreach (IShape shape in figure.FigureShapes)
+						shape.Draw(e.Graphics, figure.FigureColor, figure.StrokeThickness);
+			}
 		}
 
 		private void drawFigureButton_Click(object sender, EventArgs e)
@@ -287,8 +273,9 @@ namespace SimplePaint
 			_mouseUpPosition = Point.Empty;
 
 			_shapeManager.DeselectFigures();
-			_selectedLine = null;
-			_multisamplingFigure = null;
+
+			var multisamplingFigure = _shapeManager.MultisamplingFigure;
+			if (multisamplingFigure != null) multisamplingFigure.MultisamplingLine = null;
 		}
 
 		private void SetFormState(FormState state)
@@ -332,15 +319,13 @@ namespace SimplePaint
 		/// <returns>True if such a line was found, false otherwise</returns>
 		private bool SelectLineForMultisampling(Point location)
 		{
+			var multisamplingFigure = _shapeManager.MultisamplingFigure;
+			if (multisamplingFigure != null) multisamplingFigure.MultisamplingLine = null;
+
 			foreach (var figure in _shapeManager.Figures)
 			{
 				var line = figure.GetLineContainingPoint(location);
 				if (line == null) continue;
-
-				if (_multisamplingFigure != null) _multisamplingFigure.MultisamplingLine = null;
-
-				_multisamplingFigure = figure;
-				_selectedLine = line;
 				figure.MultisamplingLine = line;
 				drawingArea.Refresh();
 				return true;
