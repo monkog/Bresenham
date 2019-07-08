@@ -57,9 +57,9 @@
 			this.drawingArea.TabIndex = 0;
 			this.drawingArea.TabStop = false;
 			this.drawingArea.Paint += new System.Windows.Forms.PaintEventHandler(this.drawingArea_Paint);
-			this.drawingArea.MouseDown += new System.Windows.Forms.MouseEventHandler(this.drawingArea_MouseDown);
-			this.drawingArea.MouseMove += new System.Windows.Forms.MouseEventHandler(this.drawingArea_MouseMove);
-			this.drawingArea.MouseUp += new System.Windows.Forms.MouseEventHandler(this.drawingArea_MouseUp);
+			this.drawingArea.MouseDown += new System.Windows.Forms.MouseEventHandler(this.MouseDownOccured);
+			this.drawingArea.MouseMove += new System.Windows.Forms.MouseEventHandler(this.MouseMoveOccured);
+			this.drawingArea.MouseUp += new System.Windows.Forms.MouseEventHandler(this.MouseUpOccured);
 			// 
 			// buttonsPanel
 			// 

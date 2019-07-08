@@ -70,15 +70,7 @@ namespace SimplePaint
 		/// </summary>
 		private bool _doMultisample;
 		#endregion Private Members
-		#region Event Methods
-		/// <summary>
-		/// Handles the Load event of the FigureDesigner control.
-		/// </summary>
-		/// <remarks>
-		/// Sets up the layout and initializes default values
-		/// </remarks>
-		/// <param name="sender">The source of the event.</param>
-		/// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+
 		private void FigureDesigner_Load(object sender, EventArgs e)
 		{
 			InitializeDefaultValues();
@@ -86,6 +78,70 @@ namespace SimplePaint
 
 			drawFigureButton.PerformClick();
 		}
+
+		private void MouseDownOccured(object sender, MouseEventArgs e)
+		{
+			_mouseDownPosition = new Point(e.X, e.Y);
+			_mouseLastPosition = _mouseDownPosition;
+
+			if (_shapeManager.SelectedFigure != null || _doDrawFigure || _doAddVertex || _doChangeColor || _doChangeThickness)
+				return;
+
+			_shapeManager.SelectFigure(e.Location);
+
+			if (_doMultisample && SelectLineForMultisampling(e.Location)) return;
+
+			if (_shapeManager.SelectedFigure == null) return;
+			Cursor = Cursors.SizeAll;
+			if (_shapeManager.SelectedFigure.IsVertex(e.Location, out var vertex)) vertex.Select();
+		}
+
+		private void MouseMoveOccured(object sender, MouseEventArgs e)
+		{
+			Cursor = (_doAddVertex || _doDrawFigure) ? Cursors.Cross : Cursors.Default;
+
+			if (_shapeManager.SelectedFigure == null && !_doDrawFigure && !_doAddVertex && SetCursorImage(e.Location)) return;
+			if (_shapeManager.SelectedFigure != null && _shapeManager.SelectedFigure.Vertices.Any(v => v.IsSelected) && MoveVertex(e.Location)) return;
+			if (_shapeManager.SelectedFigure != null && !MoveFigure(e.Location)) return;
+
+			// Proceed when drawing current figure is in progress. 
+			// Draws a temporary line between the last vertex and current mouse position.
+			if (_doDrawFigure && _currentFigure != null)
+			{
+				if (_currentFigure.FigureShapes.Last() is CustomLine)
+					_currentFigure.FigureShapes.Remove(_currentFigure.FigureShapes.Last());
+				_currentFigure.FigureShapes.AddLast(new CustomLine(_currentFigure.LastVertex.Position, new Point(e.X, e.Y)));
+			}
+
+			drawingArea.Refresh();
+		}
+
+		private void MouseUpOccured(object sender, MouseEventArgs e)
+		{
+			_mouseUpPosition = new Point(e.X, e.Y);
+			_shapeManager.DeselectFigures();
+
+			// Add vertex to existing figure.
+			if (!_doDrawFigure && _doAddVertex)
+			{
+				foreach (var figure in _shapeManager.Figures)
+				{
+					var line = figure.GetLineContainingPoint(_mouseUpPosition);
+					if (line == null) continue;
+
+					figure.AddVertexOnLine(_mouseUpPosition, line);
+					drawingArea.Refresh();
+					return;
+				}
+			}
+
+			if (_doDrawFigure && DrawFigure()) return;
+
+			if (_doChangeColor && ChangeFigureColor(e.Location)) return;
+
+			if (_doChangeThickness) ChangeFigureThickness(e.Location);
+		}
+
 		/// <summary>
 		/// Handles the Paint event of the drawingArea control.
 		/// </summary>
@@ -116,96 +172,7 @@ namespace SimplePaint
 							shape.Draw(e.Graphics, figure.FigureColor, figure.StrokeThickness);
 				}
 		}
-		/// <summary>
-		/// Handles the MouseDown event of the drawingArea control.
-		/// </summary>
-		/// <param name="sender">The source of the event.</param>
-		/// <param name="e">The <see cref="MouseEventArgs"/> instance containing the event data.</param>
-		private void drawingArea_MouseDown(object sender, MouseEventArgs e)
-		{
-			_mouseDownPosition = new Point(e.X, e.Y);
-			_mouseLastPosition = _mouseDownPosition;
 
-			if (_shapeManager.SelectedFigure != null || _doDrawFigure || _doAddVertex || _doChangeColor || _doChangeThickness)
-				return;
-
-
-			_shapeManager.SelectFigure(e.Location);
-
-			if (_shapeManager.SelectedFigure != null) Cursor = Cursors.SizeAll;
-
-			if (_doMultisample && SelectLineForMultisampling(e.Location)) return;
-
-			_shapeManager.SelectFigure(e.Location);
-
-			if (_shapeManager.SelectedFigure == null) return;
-
-			Cursor = Cursors.SizeAll;
-			if (_shapeManager.SelectedFigure.IsVertex(e.Location, out var vertex)) vertex.Select();
-		}
-		/// <summary>
-		/// Handles the MouseMove event of the drawingArea control.
-		/// </summary>
-		/// <param name="sender">The source of the event.</param>
-		/// <param name="e">The <see cref="MouseEventArgs"/> instance containing the event data.</param>
-		private void drawingArea_MouseMove(object sender, MouseEventArgs e)
-		{
-			Cursor = Cursors.Default;
-
-			if (_doAddVertex || _doDrawFigure)
-				Cursor = Cursors.Cross;
-
-			if (_shapeManager.SelectedFigure == null && !_doDrawFigure && !_doAddVertex && SetCursorImage(e.Location)) return;
-			if (_shapeManager.SelectedFigure != null && _shapeManager.SelectedFigure.Vertices.Any(v => v.IsSelected) && MoveVertex(e.Location)) return;
-			if (_shapeManager.SelectedFigure != null && !MoveFigure(e.Location)) return;
-
-			// Proceed when drawing current figure is in progress. 
-			// Draws a temporary line between the last vertex and current mouse position.
-			if (_doDrawFigure && _currentFigure != null)
-			{
-				if (_currentFigure.FigureShapes.Last().GetType() == typeof(CustomLine))
-					_currentFigure.FigureShapes.Remove(_currentFigure.FigureShapes.Last());
-				_currentFigure.FigureShapes.AddLast(new CustomLine(_currentFigure.LastVertex.Position, new Point(e.X, e.Y)));
-			}
-
-			drawingArea.Refresh();
-		}
-		/// <summary>
-		/// Handles the MouseUp event of the drawingArea control.
-		/// </summary>
-		/// <param name="sender">The source of the event.</param>
-		/// <param name="e">The <see cref="MouseEventArgs"/> instance containing the event data.</param>
-		private void drawingArea_MouseUp(object sender, MouseEventArgs e)
-		{
-			_mouseUpPosition = new Point(e.X, e.Y);
-			_shapeManager.DeselectFigures();
-
-			// Add vertex to existing figure.
-			if (!_doDrawFigure && _doAddVertex)
-			{
-				foreach (var figure in _shapeManager.Figures)
-				{
-					var line = figure.GetLineContainingPoint(_mouseUpPosition);
-					if (line == null) continue;
-
-					figure.AddVertexOnLine(_mouseUpPosition, line);
-					drawingArea.Refresh();
-					return;
-				}
-			}
-
-			if (_doDrawFigure && DrawFigure()) return;
-
-			if (_doChangeColor && ChangeFigureColor(e.Location)) return;
-
-			if (_doChangeThickness)
-				ChangeFigureThickness(e.Location);
-		}
-		/// <summary>
-		/// Handles the Click event of the drawFigureButton control.
-		/// </summary>
-		/// <param name="sender">The source of the event.</param>
-		/// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
 		private void drawFigureButton_Click(object sender, EventArgs e)
 		{
 			if (_doDrawFigure)
@@ -332,7 +299,7 @@ namespace SimplePaint
 			SetButtonStates(addVertex: false, drawFigure: false, changeColor: false
 				, changeThickness: false, doMultisampling: true);
 		}
-		#endregion Event Methods
+
 		#region Private Methods
 		/// <summary>
 		/// Sets the default settings and clears the figures.
