@@ -22,6 +22,11 @@ namespace SimplePaint
 		/// </summary>
 		public CustomFigure MultisamplingFigure => Figures.SingleOrDefault(f => f.MultisamplingLine != null);
 
+		/// <summary>
+		/// Gets the currently drawn figure.
+		/// </summary>
+		public CustomFigure CurrentFigure { get; private set; }
+
 		public ShapeManager()
 		{
 			Figures = new List<CustomFigure>();
@@ -43,6 +48,38 @@ namespace SimplePaint
 		public void DeselectFigures()
 		{
 			Figures.ForEach(f => f.Deselect());
+		}
+
+		/// <summary>
+		/// Initializes drawing a new figure.
+		/// </summary>
+		/// <param name="point">Position of the first vertex of the figure.</param>
+		/// <param name="color">Color of the figure.</param>
+		/// <param name="strokeThickness">Stroke thickness.</param>
+		public void StartDrawingFigure(Point point, Color color, int strokeThickness)
+		{
+			CurrentFigure = new CustomFigure(point, color, strokeThickness);
+		}
+
+		/// <summary>
+		/// Tries to add a vertex at given position to the current figure.
+		/// </summary>
+		/// <param name="point">Position of the vertex.</param>
+		public void TryAddVertexToCurrentFigure(Point point)
+		{
+			var added = CurrentFigure.TryAddVertex(point);
+			if (added) return;
+
+			Figures.Add(CurrentFigure);
+			CurrentFigure = null;
+		}
+
+		/// <summary>
+		/// Cancels drawing the currently drawn figure.
+		/// </summary>
+		public void CancelDrawing()
+		{
+			CurrentFigure = null;
 		}
 	}
 }

@@ -28,15 +28,6 @@ namespace SimplePaint
 			InitializeComponent();
 		}
 
-		#region Private Members
-
-		/// <summary>
-		/// The currently drawn figure
-		/// </summary>
-		private CustomFigure _currentFigure;
-
-		#endregion Private Members
-
 		private void FigureDesigner_Load(object sender, EventArgs e)
 		{
 			InitializeDefaultValues();
@@ -72,11 +63,11 @@ namespace SimplePaint
 
 			// Proceed when drawing current figure is in progress. 
 			// Draws a temporary line between the last vertex and current mouse position.
-			if (_formState == FormState.DrawFigure && _currentFigure != null)
+			if (_formState == FormState.DrawFigure && _shapeManager.CurrentFigure != null)
 			{
-				if (_currentFigure.FigureShapes.Last() is CustomLine)
-					_currentFigure.FigureShapes.Remove(_currentFigure.FigureShapes.Last());
-				_currentFigure.FigureShapes.AddLast(new CustomLine(_currentFigure.LastVertex.Position, new Point(e.X, e.Y)));
+				if (_shapeManager.CurrentFigure.FigureShapes.Last() is CustomLine)
+					_shapeManager.CurrentFigure.FigureShapes.Remove(_shapeManager.CurrentFigure.FigureShapes.Last());
+				_shapeManager.CurrentFigure.FigureShapes.AddLast(new CustomLine(_shapeManager.CurrentFigure.LastVertex.Position, new Point(e.X, e.Y)));
 			}
 
 			drawingArea.Refresh();
@@ -101,7 +92,11 @@ namespace SimplePaint
 				}
 			}
 
-			if (_formState == FormState.DrawFigure && DrawFigure()) return;
+			if (_formState == FormState.DrawFigure)
+			{
+				AddNewVertex();
+				return;
+			}
 
 			if (_formState == FormState.ChangeColor && ChangeFigureColor(e.Location)) return;
 
@@ -115,9 +110,9 @@ namespace SimplePaint
 		/// <param name="e">The <see cref="PaintEventArgs"/> instance containing the event data.</param>
 		private void drawingArea_Paint(object sender, PaintEventArgs e)
 		{
-			if (_currentFigure != null)
-				foreach (IShape shape in _currentFigure.FigureShapes)
-					shape.Draw(e.Graphics, _currentFigure.FigureColor, _currentFigure.StrokeThickness);
+			if (_shapeManager.CurrentFigure != null)
+				foreach (IShape shape in _shapeManager.CurrentFigure.FigureShapes)
+					shape.Draw(e.Graphics, _shapeManager.CurrentFigure.FigureColor, _shapeManager.CurrentFigure.StrokeThickness);
 			if (!_shapeManager.Figures.Any()) return;
 			var multisamplingFigure = _shapeManager.MultisamplingFigure;
 
@@ -146,7 +141,8 @@ namespace SimplePaint
 			if (_formState == FormState.DrawFigure)
 			{
 				SetFormState(FormState.Default);
-				_currentFigure = null;
+				_shapeManager.CancelDrawing();
+				drawingArea.Refresh();
 				return;
 			}
 
@@ -166,7 +162,7 @@ namespace SimplePaint
 				return;
 			}
 
-			if (!_shapeManager.Figures.Any() || (_formState == FormState.DrawFigure && _currentFigure != null))
+			if (!_shapeManager.Figures.Any() || (_formState == FormState.DrawFigure && _shapeManager.CurrentFigure != null))
 			{
 				MessageBox.Show("You have to finish drawing at least one figure to use this functionality.", "Don't do that!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 				return;
@@ -191,7 +187,7 @@ namespace SimplePaint
 		/// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
 		private void changeColorButton_Click(object sender, EventArgs e)
 		{
-			if (_formState == FormState.DrawFigure && _currentFigure != null && _currentFigure.Vertices.Any())
+			if (_formState == FormState.DrawFigure && _shapeManager.CurrentFigure != null && _shapeManager.CurrentFigure.Vertices.Any())
 			{
 				MessageBox.Show("You have to finish drawing to use this functionality.", "Don't do that!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 				return;
@@ -218,7 +214,7 @@ namespace SimplePaint
 		/// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
 		private void changeSizeButton_Click(object sender, EventArgs e)
 		{
-			if (_formState == FormState.DrawFigure && _currentFigure != null && _currentFigure.Vertices.Any())
+			if (_formState == FormState.DrawFigure && _shapeManager.CurrentFigure != null && _shapeManager.CurrentFigure.Vertices.Any())
 			{
 				MessageBox.Show("You have to finish drawing to use this functionality.", "Don't do that!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 				return;
@@ -261,7 +257,7 @@ namespace SimplePaint
 			SetFormState(FormState.Default);
 
 			_shapeManager.Figures.Clear();
-			_currentFigure = null;
+			_shapeManager.CancelDrawing();
 			drawingArea.Refresh();
 		}
 
@@ -402,36 +398,18 @@ namespace SimplePaint
 
 			return false;
 		}
-		/// <summary>
-		/// Draws the figure.
-		/// </summary>
-		/// <returns>True if the figure is completed or can be completed but has less than 3 vertices</returns>
-		private bool DrawFigure()
+
+		private void AddNewVertex()
 		{
-			if (_currentFigure == null)
+			if (_shapeManager.CurrentFigure == null)
 			{
-				_currentFigure = new CustomFigure(_mouseUpPosition, colorPictureBox.BackColor, _strokeThickness);
+				_shapeManager.StartDrawingFigure(_mouseUpPosition, colorPictureBox.BackColor, _strokeThickness);
 			}
-			else
-			{
-				if (_currentFigure.WillCloseFigure(_mouseUpPosition))
-				{
-					if (_currentFigure.Vertices.Count < 3) return true;
 
-					_shapeManager.Figures.Add(_currentFigure);
-					_currentFigure.FigureShapes.Remove(_currentFigure.FigureShapes.Last());
-					_currentFigure.FigureShapes.AddLast(new CustomLine(_currentFigure.LastVertex.Position,
-						_currentFigure.FirstVertex.Position));
-					drawingArea.Refresh();
-
-					_currentFigure = null;
-					return true;
-				}
-				_currentFigure.AddVertex(_mouseUpPosition);
-			}
+			_shapeManager.TryAddVertexToCurrentFigure(_mouseUpPosition);
 			drawingArea.Refresh();
-			return false;
 		}
+
 		/// <summary>
 		/// Move the vertex in the bounds of drawingArea.
 		/// </summary>

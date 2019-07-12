@@ -137,20 +137,6 @@ namespace SimplePaint.Shapes
 		}
 
 		/// <summary>
-		/// Adds the vertex to the newly constructed figure.
-		/// </summary>
-		/// <param name="point">The vertex coordinates.</param>
-		public void AddVertex(Point point)
-		{
-			if (IsVertex(point, out _)) return;
-
-			Vertices.AddLast(new CustomEllipse(point));
-			FigureShapes.AddLast(new CustomEllipse(point));
-
-			UpdateBoundingBox();
-		}
-
-		/// <summary>
 		/// Determines whether this figure contains the given point.
 		/// </summary>
 		/// <param name="point">The point to look for.</param>
@@ -290,13 +276,37 @@ namespace SimplePaint.Shapes
 		}
 
 		/// <summary>
-		/// Determines whether adding a vertex in the given position will result in closing this figure.
+		/// Tries to add a new vertex to this figure.
 		/// </summary>
-		/// <param name="point"></param>
-		/// <returns>True if adding a vertex in the given position will close the figure, otherwise false.</returns>
-		public bool WillCloseFigure(Point point)
+		/// <param name="point">Position of the new vertex.</param>
+		/// <returns>True if the vertex was successfully added, false otherwise.</returns>
+		public bool TryAddVertex(Point point)
+		{
+			if (Vertices.Count < 3 || !WillCloseFigure(point))
+			{
+				AddVertex(point);
+				return true;
+			}
+
+			FigureShapes.Remove(FigureShapes.Last());
+			FigureShapes.AddLast(new CustomLine(LastVertex.Position, FirstVertex.Position));
+
+			return false;
+		}
+
+		private bool WillCloseFigure(Point point)
 		{
 			return FindVertexAtPoint(point) == FirstVertex;
+		}
+
+		private void AddVertex(Point point)
+		{
+			if (IsVertex(point, out _)) return;
+
+			Vertices.AddLast(new CustomEllipse(point));
+			FigureShapes.AddLast(new CustomEllipse(point));
+
+			UpdateBoundingBox();
 		}
 
 		private void UpdateLinesPositions(LinkedListNode<IShape> node, int deltaX, int deltaY)

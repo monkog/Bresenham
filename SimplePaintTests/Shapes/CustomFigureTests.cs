@@ -22,10 +22,10 @@ namespace SimplePaintTests.Shapes
 		public void Initialize()
 		{
 			_unitUnderTest = new CustomFigure(new Point(-20, 20), Color.Black, 2);
-			_unitUnderTest.AddVertex(new Point(-20, -20));
-			_unitUnderTest.AddVertex(new Point(20, -20));
-			_unitUnderTest.AddVertex(new Point(20, 20));
-			_unitUnderTest.AddVertex(new Point(0, 0));
+			_unitUnderTest.TryAddVertex(new Point(-20, -20));
+			_unitUnderTest.TryAddVertex(new Point(20, -20));
+			_unitUnderTest.TryAddVertex(new Point(20, 20));
+			_unitUnderTest.TryAddVertex(new Point(0, 0));
 		}
 
 		[DataTestMethod]
@@ -67,32 +67,32 @@ namespace SimplePaintTests.Shapes
 		[DataTestMethod]
 		[DataRow(-20, 20, DisplayName = "Already existing vertex - not added")]
 		[DataRow(-21, 21, DisplayName = "Close to already existing vertex - not added")]
-		public void AddVertex_VertexPoint_HasNotBeenAdded(int x, int y)
+		public void TryAddVertex_VertexPoint_HasNotBeenAdded(int x, int y)
 		{
 			var vertexCount = _unitUnderTest.Vertices.Count;
 
-			_unitUnderTest.AddVertex(new Point(x, y));
+			_unitUnderTest.TryAddVertex(new Point(x, y));
 
 			Assert.AreEqual(vertexCount, _unitUnderTest.Vertices.Count);
 		}
 
 		[TestMethod]
-		public void AddVertex_VertexPoint_HasBeenAdded()
+		public void TryAddVertex_VertexPoint_HasBeenAdded()
 		{
 			var vertexCount = _unitUnderTest.Vertices.Count;
 
-			_unitUnderTest.AddVertex(new Point(40, 40));
+			_unitUnderTest.TryAddVertex(new Point(40, 40));
 
 			Assert.AreEqual(vertexCount + 1, _unitUnderTest.Vertices.Count);
 		}
 
 		[TestMethod]
-		public void AddVertex_VertexPoint_BoundingBoxUpdated()
+		public void TryAddVertex_VertexPoint_BoundingBoxUpdated()
 		{
 			var minX = _unitUnderTest.MinX;
 			var minY = _unitUnderTest.MinY;
 
-			_unitUnderTest.AddVertex(new Point(-50, -40));
+			_unitUnderTest.TryAddVertex(new Point(-50, -40));
 
 			Assert.AreNotEqual(minX, _unitUnderTest.MinX);
 			Assert.AreEqual(-50, _unitUnderTest.MinX);
@@ -150,7 +150,7 @@ namespace SimplePaintTests.Shapes
 			var secondVertex = new Point(10, 10);
 
 			var unitUnderTest = new CustomFigure(firstVertex, Color.AliceBlue, 1);
-			unitUnderTest.AddVertex(secondVertex);
+			unitUnderTest.TryAddVertex(secondVertex);
 
 			unitUnderTest.Move(-10, -19);
 
@@ -272,26 +272,57 @@ namespace SimplePaintTests.Shapes
 			Assert.AreEqual(line, result);
 		}
 
-		[DataTestMethod]
-		[DataRow(100, 100, DisplayName = "Outside bounding box")]
-		[DataRow(0, 20, DisplayName = "Outside figure")]
-		[DataRow(0, -20, DisplayName = "On the edge of the shape")]
-		[DataRow(20, -20, DisplayName = "Other vertex")]
-		public void WillCloseFigure_NotFirstVertexPoint_False(int x, int y)
+		[TestMethod]
+		public void TryAddFigure_1Vertex_True()
 		{
-			var result = _unitUnderTest.WillCloseFigure(new Point(x, y));
+			var point = new Point(2, 20);
+			var unitUnderTest = new CustomFigure(new Point(1, 3), Color.AntiqueWhite, 2);
 
-			Assert.IsFalse(result);
-		}
-
-		[DataTestMethod]
-		[DataRow(-20, 20, DisplayName = "First vertex")]
-		[DataRow(-21, 21, DisplayName = "Close to first vertex")]
-		public void WillCloseFigure_FirstVertexPoint_True(int x, int y)
-		{
-			var result = _unitUnderTest.WillCloseFigure(new Point(x, y));
+			var result = unitUnderTest.TryAddVertex(point);
 
 			Assert.IsTrue(result);
+			Assert.IsTrue(unitUnderTest.FigureShapes.OfType<CustomEllipse>().Any(e => e.Position == point));
+		}
+
+		[TestMethod]
+		public void TryAddFigure_2Vertices_True()
+		{
+			var point = new Point(2, 20);
+			var unitUnderTest = new CustomFigure(new Point(1, 3), Color.AntiqueWhite, 2);
+			unitUnderTest.TryAddVertex(new Point(10, 100));
+
+			var result = unitUnderTest.TryAddVertex(point);
+
+			Assert.IsTrue(result);
+			Assert.IsTrue(unitUnderTest.FigureShapes.OfType<CustomEllipse>().Any(e => e.Position == point));
+		}
+
+		[TestMethod]
+		public void TryAddFigure_3VerticesNotClosingVertex_True()
+		{
+			var point = new Point(2, 200);
+			var unitUnderTest = new CustomFigure(new Point(1, 3), Color.AntiqueWhite, 2);
+			unitUnderTest.TryAddVertex(new Point(10, 100));
+			unitUnderTest.TryAddVertex(new Point(20, 100));
+
+			var result = unitUnderTest.TryAddVertex(point);
+
+			Assert.IsTrue(result);
+			Assert.IsTrue(unitUnderTest.FigureShapes.OfType<CustomEllipse>().Any(e => e.Position == point));
+		}
+
+		[TestMethod]
+		public void TryAddFigure_ClosingVertex_False()
+		{
+			var point = new Point(2, 3);
+			var unitUnderTest = new CustomFigure(new Point(1, 3), Color.AntiqueWhite, 2);
+			unitUnderTest.TryAddVertex(new Point(10, 100));
+			unitUnderTest.TryAddVertex(new Point(20, 100));
+
+			var result = unitUnderTest.TryAddVertex(point);
+
+			Assert.IsFalse(result);
+			Assert.IsFalse(unitUnderTest.FigureShapes.OfType<CustomEllipse>().Any(e => e.Position == point));
 		}
 	}
 }

@@ -17,9 +17,9 @@ namespace SimplePaintTests
 		public void Initialize()
 		{
 			_figure = new CustomFigure(new Point(-10, 10), Color.Black, 2);
-			_figure.AddVertex(new Point(-10, -10));
-			_figure.AddVertex(new Point(10, -10));
-			_figure.AddVertex(new Point(10, 10));
+			_figure.TryAddVertex(new Point(-10, -10));
+			_figure.TryAddVertex(new Point(10, -10));
+			_figure.TryAddVertex(new Point(10, 10));
 
 			_unitUnderTest = new ShapeManager();
 		}
@@ -32,6 +32,7 @@ namespace SimplePaintTests
 			Assert.IsNotNull(unitUnderTest.Figures);
 			Assert.IsFalse(unitUnderTest.Figures.Any());
 			Assert.IsNull(_unitUnderTest.SelectedFigure);
+			Assert.IsNull(_unitUnderTest.CurrentFigure);
 		}
 
 		[TestMethod]
@@ -72,6 +73,78 @@ namespace SimplePaintTests
 			_unitUnderTest.Figures.Add(_figure);
 
 			Assert.IsNull(_unitUnderTest.MultisamplingFigure);
+		}
+
+		[TestMethod]
+		public void StartDrawingFigure_Always_CurrentFigureAssigned()
+		{
+			var point = new Point(2, 10);
+			var color = Color.AliceBlue;
+			const int strokeThickness = 5;
+
+			_unitUnderTest.StartDrawingFigure(point, color, strokeThickness);
+			var currentFigure = _unitUnderTest.CurrentFigure;
+
+			Assert.IsNotNull(currentFigure);
+			Assert.AreEqual(point, currentFigure.FirstVertex.Position);
+			Assert.AreEqual(color, currentFigure.FigureColor);
+			Assert.AreEqual(strokeThickness, currentFigure.StrokeThickness);
+		}
+
+		[TestMethod]
+		public void CancelDrawing_Always_CurrentFigureNull()
+		{
+			_unitUnderTest.StartDrawingFigure(new Point(2, 10), Color.AliceBlue, 5);
+
+			_unitUnderTest.CancelDrawing();
+
+			Assert.IsNull(_unitUnderTest.CurrentFigure);
+		}
+
+		[TestMethod]
+		public void TryAddVertexToCurrentFigure_CanAdd_CurrentFigureNotNull()
+		{
+			_unitUnderTest.StartDrawingFigure(new Point(2, 10), Color.AliceBlue, 5);
+
+			_unitUnderTest.TryAddVertexToCurrentFigure(new Point(100, 100));
+
+			Assert.IsNotNull(_unitUnderTest.CurrentFigure);
+		}
+
+		[TestMethod]
+		public void TryAddVertexToCurrentFigure_CanAdd_CurrentFigureNotInFiguresCollection()
+		{
+			_unitUnderTest.StartDrawingFigure(new Point(2, 10), Color.AliceBlue, 5);
+
+			_unitUnderTest.TryAddVertexToCurrentFigure(new Point(100, 100));
+
+			CollectionAssert.DoesNotContain(_unitUnderTest.Figures, _unitUnderTest.CurrentFigure);
+		}
+
+		[TestMethod]
+		public void TryAddVertexToCurrentFigure_CannotAdd_CurrentFigureNull()
+		{
+			_unitUnderTest.StartDrawingFigure(new Point(2, 10), Color.AliceBlue, 5);
+			var figure = _unitUnderTest.CurrentFigure;
+			figure.TryAddVertex(new Point(20, 20));
+			figure.TryAddVertex(new Point(20, 40));
+
+			_unitUnderTest.TryAddVertexToCurrentFigure(new Point(2, 10));
+
+			Assert.IsNull(_unitUnderTest.CurrentFigure);
+		}
+
+		[TestMethod]
+		public void TryAddVertexToCurrentFigure_CannotAdd_CurrentFigureInFiguresCollection()
+		{
+			_unitUnderTest.StartDrawingFigure(new Point(2, 10), Color.AliceBlue, 5);
+			var figure = _unitUnderTest.CurrentFigure;
+			figure.TryAddVertex(new Point(20, 20));
+			figure.TryAddVertex(new Point(20, 40));
+
+			_unitUnderTest.TryAddVertexToCurrentFigure(new Point(2, 10));
+
+			CollectionAssert.Contains(_unitUnderTest.Figures, figure);
 		}
 	}
 }
