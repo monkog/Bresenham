@@ -194,7 +194,6 @@
 			this.Name = "FigureDesigner";
 			this.Text = "Form1";
 			this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
-			this.Load += new System.EventHandler(this.FigureDesigner_Load);
 			((System.ComponentModel.ISupportInitialize)(this.drawingArea)).EndInit();
 			this.buttonsPanel.ResumeLayout(false);
 			this.buttonsPanel.PerformLayout();

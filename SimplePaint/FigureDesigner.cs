@@ -21,19 +21,12 @@ namespace SimplePaint
 
 		private Point _mouseLastPosition;
 
-		private int _strokeThickness;
+		private int _strokeThickness = 2;
 
 		public FigureDesigner()
 		{
 			InitializeComponent();
-		}
-
-		private void FigureDesigner_Load(object sender, EventArgs e)
-		{
-			InitializeDefaultValues();
-			SetDefaultSettings();
-
-			drawFigureButton.PerformClick();
+			SetFormState(FormState.DrawFigure);
 		}
 
 		private void MouseDownOccured(object sender, MouseEventArgs e)
@@ -142,7 +135,6 @@ namespace SimplePaint
 			}
 
 			SetFormState(FormState.DrawFigure);
-			Cursor = Cursors.Cross;
 		}
 
 		private void addVertexButton_Click(object sender, EventArgs e)
@@ -229,19 +221,6 @@ namespace SimplePaint
 			drawingArea.Refresh();
 		}
 
-		private void InitializeDefaultValues()
-		{
-			_strokeThickness = 2;
-
-			_mouseDownPosition = Point.Empty;
-			_mouseUpPosition = Point.Empty;
-
-			_shapeManager.DeselectFigures();
-
-			var multisamplingFigure = _shapeManager.MultisamplingFigure;
-			if (multisamplingFigure != null) multisamplingFigure.MultisamplingLine = null;
-		}
-
 		private void SetFormState(FormState state)
 		{
 			_formState = state;
@@ -255,6 +234,7 @@ namespace SimplePaint
 			{
 				case FormState.DrawFigure:
 					drawFigureButton.Text = Resources.Cancel;
+					Cursor = Cursors.Cross;
 					break;
 				case FormState.AddVertex:
 					addVertexButton.Text = Resources.Cancel;
