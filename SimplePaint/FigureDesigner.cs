@@ -103,11 +103,6 @@ namespace SimplePaint
 			if (_formState == FormState.ChangeThickness) ChangeFigureThickness(e.Location);
 		}
 
-		/// <summary>
-		/// Handles the Paint event of the drawingArea control.
-		/// </summary>
-		/// <param name="sender">The source of the event.</param>
-		/// <param name="e">The <see cref="PaintEventArgs"/> instance containing the event data.</param>
 		private void drawingArea_Paint(object sender, PaintEventArgs e)
 		{
 			if (_shapeManager.CurrentFigure != null)
@@ -149,11 +144,7 @@ namespace SimplePaint
 			SetFormState(FormState.DrawFigure);
 			Cursor = Cursors.Cross;
 		}
-		/// <summary>
-		/// Handles the Click event of the addVertexButton control.
-		/// </summary>
-		/// <param name="sender">The source of the event.</param>
-		/// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+
 		private void addVertexButton_Click(object sender, EventArgs e)
 		{
 			if (_formState == FormState.AddVertex)
@@ -171,20 +162,12 @@ namespace SimplePaint
 			SetFormState(FormState.AddVertex);
 			Cursor = Cursors.Cross;
 		}
-		/// <summary>
-		/// Clears all figures and restores the default settings.
-		/// </summary>
-		/// <param name="sender">The source of the event.</param>
-		/// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+
 		private void clearButton_Click(object sender, EventArgs e)
 		{
 			SetDefaultSettings();
 		}
-		/// <summary>
-		/// Handles the Click event of the changeColorButton control.
-		/// </summary>
-		/// <param name="sender">The source of the event.</param>
-		/// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+
 		private void changeColorButton_Click(object sender, EventArgs e)
 		{
 			if (_formState == FormState.DrawFigure && _shapeManager.CurrentFigure != null && _shapeManager.CurrentFigure.Vertices.Any())
@@ -207,11 +190,7 @@ namespace SimplePaint
 
 			if (_formState != FormState.DrawFigure) SetFormState(FormState.ChangeColor);
 		}
-		/// <summary>
-		/// Handles the Click event of the changeSizeButton control.
-		/// </summary>
-		/// <param name="sender">The source of the event.</param>
-		/// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+
 		private void changeSizeButton_Click(object sender, EventArgs e)
 		{
 			if (_formState == FormState.DrawFigure && _shapeManager.CurrentFigure != null && _shapeManager.CurrentFigure.Vertices.Any())
@@ -234,24 +213,13 @@ namespace SimplePaint
 			_strokeThickness = enterValueWindow.LineThickness;
 			sizeLabel.Text = "CURRENT SIZE: " + enterValueWindow.LineThickness + " px";
 		}
-		/// <summary>
-		/// Handles the Click event of the multisamplingButton control.
-		/// </summary>
-		/// <remarks>
-		/// Draws the figure using multisampling
-		/// </remarks>
-		/// <param name="sender">The source of the event.</param>
-		/// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+
 		private void multisamplingButton_Click(object sender, EventArgs e)
 		{
 			var state = _formState == FormState.Multisampling ? FormState.Default : FormState.Multisampling;
 			SetFormState(state);
 		}
 
-		#region Private Methods
-		/// <summary>
-		/// Sets the default settings and clears the figures.
-		/// </summary>
 		private void SetDefaultSettings()
 		{
 			SetFormState(FormState.Default);
@@ -308,11 +276,6 @@ namespace SimplePaint
 			}
 		}
 
-		/// <summary>
-		/// Selects the line for multisampling.
-		/// </summary>
-		/// <param name="location">The location.</param>
-		/// <returns>True if such a line was found, false otherwise</returns>
 		private bool SelectLineForMultisampling(Point location)
 		{
 			var multisamplingFigure = _shapeManager.MultisamplingFigure;
@@ -329,11 +292,7 @@ namespace SimplePaint
 
 			return false;
 		}
-		/// <summary>
-		/// Changes the cursor image if the drawing mode is off and mouse is above any of the previously drawn shapes.
-		/// </summary>
-		/// <param name="location">The location.</param>
-		/// <returns>True if the cursor has been changed, false otherwise</returns>
+
 		private bool SetCursorImage(Point location)
 		{
 			var isCursorOverFigure = _shapeManager.Figures.Any(figure => figure.GetLineContainingPoint(location) != null);
@@ -363,10 +322,7 @@ namespace SimplePaint
 			}
 			return false;
 		}
-		/// <summary>
-		/// Changes the line thickness of the chosen figure.
-		/// </summary>
-		/// <param name="location">The location.</param>
+
 		private void ChangeFigureThickness(Point location)
 		{
 			foreach (var figure in _shapeManager.Figures)
@@ -379,11 +335,7 @@ namespace SimplePaint
 				return;
 			}
 		}
-		/// <summary>
-		/// Changes the color of the chosen figure.
-		/// </summary>
-		/// <param name="location">The location.</param>
-		/// <returns></returns>
+
 		private bool ChangeFigureColor(Point location)
 		{
 			foreach (var figure in _shapeManager.Figures)
@@ -409,12 +361,7 @@ namespace SimplePaint
 			_shapeManager.TryAddVertexToCurrentFigure(_mouseUpPosition);
 			drawingArea.Refresh();
 		}
-
-		/// <summary>
-		/// Move the vertex in the bounds of drawingArea.
-		/// </summary>
-		/// <param name="point">The mouse position.</param>
-		/// <returns>True if there was a vertex to move and it was moved, false otherwise</returns>
+		
 		private bool MoveVertex(Point point)
 		{
 			var deltaX = point.X - _mouseLastPosition.X;
@@ -446,7 +393,5 @@ namespace SimplePaint
 			Cursor = Cursors.SizeAll;
 			return true;
 		}
-
-		#endregion Private Methods
 	}
 }
