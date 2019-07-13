@@ -31,19 +31,29 @@ namespace SimplePaint
 
 		private void MouseDownOccured(object sender, MouseEventArgs e)
 		{
-			_mouseDownPosition = new Point(e.X, e.Y);
+			_mouseDownPosition = e.Location;
 			_mouseLastPosition = _mouseDownPosition;
 
-			if (_shapeManager.SelectedFigure != null || !(_formState == FormState.Default || _formState == FormState.Multisampling))
+			if (_formState == FormState.Multisampling)
+			{
+				_shapeManager.SelectLineForMultisampling(e.Location);
+				drawingArea.Refresh();
 				return;
+			}
+
+			if (_formState != FormState.Default) return;
 
 			_shapeManager.SelectFigure(e.Location);
-
-			if (_formState == FormState.Multisampling && SelectLineForMultisampling(e.Location)) return;
-
 			if (_shapeManager.SelectedFigure == null) return;
+
+			if (_shapeManager.SelectedFigure.IsVertex(e.Location, out var vertex))
+			{
+				vertex.Select();
+				Cursor = Cursors.Hand;
+				return;
+			}
+
 			Cursor = Cursors.SizeAll;
-			if (_shapeManager.SelectedFigure.IsVertex(e.Location, out var vertex)) vertex.Select();
 		}
 
 		private void MouseMoveOccured(object sender, MouseEventArgs e)
@@ -256,23 +266,6 @@ namespace SimplePaint
 			}
 		}
 
-		private bool SelectLineForMultisampling(Point location)
-		{
-			var multisamplingFigure = _shapeManager.MultisamplingFigure;
-			if (multisamplingFigure != null) multisamplingFigure.MultisamplingLine = null;
-
-			foreach (var figure in _shapeManager.Figures)
-			{
-				var line = figure.GetLineContainingPoint(location);
-				if (line == null) continue;
-				figure.MultisamplingLine = line;
-				drawingArea.Refresh();
-				return true;
-			}
-
-			return false;
-		}
-
 		private bool SetCursorImage(Point location)
 		{
 			var isCursorOverFigure = _shapeManager.Figures.Any(figure => figure.GetLineContainingPoint(location) != null);
@@ -341,7 +334,7 @@ namespace SimplePaint
 			_shapeManager.TryAddVertexToCurrentFigure(_mouseUpPosition);
 			drawingArea.Refresh();
 		}
-		
+
 		private bool MoveVertex(Point point)
 		{
 			var deltaX = point.X - _mouseLastPosition.X;

@@ -146,5 +146,24 @@ namespace SimplePaintTests
 
 			CollectionAssert.Contains(_unitUnderTest.Figures, figure);
 		}
+
+		[TestMethod]
+		public void SelectLineForMultisampling_PointOnFigureEdge_LineSelected()
+		{
+			_unitUnderTest.SelectLineForMultisampling(new Point(5, -10));
+
+			Assert.Fail("Fix after adding lines will work properly.");
+
+			Assert.IsNotNull(_unitUnderTest.MultisamplingFigure);
+			Assert.IsNotNull(_unitUnderTest.MultisamplingFigure.MultisamplingLine);
+		}
+
+		[TestMethod]
+		public void SelectLineForMultisampling_PointNotOnFigureEdge_MultisamplingFigureNull()
+		{
+			_unitUnderTest.SelectLineForMultisampling(new Point(100, -10));
+
+			Assert.IsNull(_unitUnderTest.MultisamplingFigure);
+		}
 	}
 }

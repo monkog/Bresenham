@@ -288,7 +288,7 @@ namespace SimplePaint.Shapes
 				return true;
 			}
 
-			FigureShapes.Remove(FigureShapes.Last());
+			FigureShapes.Remove(FigureShapes.OfType<CustomLine>().LastOrDefault());
 			FigureShapes.AddLast(new CustomLine(LastVertex.Position, FirstVertex.Position));
 
 			return false;

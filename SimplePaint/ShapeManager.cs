@@ -81,5 +81,22 @@ namespace SimplePaint
 		{
 			CurrentFigure = null;
 		}
+
+		/// <summary>
+		/// Marks the line at containing given point to be drawn using multisampling.
+		/// </summary>
+		/// <param name="point">Point on the line.</param>
+		public void SelectLineForMultisampling(Point point)
+		{
+			var multisamplingFigure = MultisamplingFigure;
+			if (multisamplingFigure != null) multisamplingFigure.MultisamplingLine = null;
+
+			foreach (var figure in Figures)
+			{
+				var line = figure.GetLineContainingPoint(point);
+				if (line == null) continue;
+				figure.MultisamplingLine = line;
+			}
+		}
 	}
 }
