@@ -324,5 +324,30 @@ namespace SimplePaintTests.Shapes
 			Assert.IsFalse(result);
 			Assert.IsFalse(unitUnderTest.FigureShapes.OfType<CustomEllipse>().Any(e => e.Position == point));
 		}
+
+		[TestMethod]
+		public void DrawTemporaryLine_Always_LineDrawn()
+		{
+			var point = new Point(100, 100);
+
+			_unitUnderTest.DrawTemporaryLine(point);
+
+			var lastShape = _unitUnderTest.FigureShapes.Last();
+			Assert.IsInstanceOfType(lastShape, typeof(CustomLine));
+			Assert.AreEqual(point, ((CustomLine)lastShape).EndPoint);
+		}
+
+		[TestMethod]
+		public void DrawTemporaryLine_Always_LastTemporaryLineRemoved()
+		{
+			var lastLine = new CustomLine(new Point(1, 10), new Point(20, 50));
+			_unitUnderTest.FigureShapes.AddLast(lastLine);
+
+			_unitUnderTest.DrawTemporaryLine(new Point(100, 100));
+
+			var lastShape = _unitUnderTest.FigureShapes.Last();
+			Assert.AreNotEqual(lastLine, lastShape);
+			CollectionAssert.DoesNotContain(_unitUnderTest.FigureShapes, lastLine);
+		}
 	}
 }

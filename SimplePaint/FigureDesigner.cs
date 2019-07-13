@@ -58,22 +58,26 @@ namespace SimplePaint
 
 		private void MouseMoveOccured(object sender, MouseEventArgs e)
 		{
-			Cursor = (_formState == FormState.AddVertex || _formState == FormState.DrawFigure) ? Cursors.Cross : Cursors.Default;
-
-			if (_shapeManager.SelectedFigure == null && _formState != FormState.DrawFigure && _formState != FormState.AddVertex && SetCursorImage(e.Location)) return;
-			if (_shapeManager.SelectedFigure != null && _shapeManager.SelectedFigure.Vertices.Any(v => v.IsSelected) && MoveVertex(e.Location)) return;
-			if (_shapeManager.SelectedFigure != null && !MoveFigure(e.Location)) return;
-
-			// Proceed when drawing current figure is in progress. 
-			// Draws a temporary line between the last vertex and current mouse position.
-			if (_formState == FormState.DrawFigure && _shapeManager.CurrentFigure != null)
+			var selectedFigure = _shapeManager.SelectedFigure;
+			if (selectedFigure != null)
 			{
-				if (_shapeManager.CurrentFigure.FigureShapes.Last() is CustomLine)
-					_shapeManager.CurrentFigure.FigureShapes.Remove(_shapeManager.CurrentFigure.FigureShapes.Last());
-				_shapeManager.CurrentFigure.FigureShapes.AddLast(new CustomLine(_shapeManager.CurrentFigure.LastVertex.Position, new Point(e.X, e.Y)));
+				var selectedVertex = selectedFigure.SelectedVertex;
+				if (selectedVertex == null) MoveFigure(e.Location);
+				else MoveVertex(e.Location);
+
+				_mouseLastPosition = e.Location;
+				drawingArea.Refresh();
+				return;
 			}
 
-			drawingArea.Refresh();
+			if (_formState == FormState.DrawFigure)
+			{
+				_shapeManager.CurrentFigure?.DrawTemporaryLine(e.Location);
+				drawingArea.Refresh();
+				return;
+			}
+
+			SetCursorImage(e.Location);
 		}
 
 		private void MouseUpOccured(object sender, MouseEventArgs e)
@@ -248,6 +252,7 @@ namespace SimplePaint
 					break;
 				case FormState.AddVertex:
 					addVertexButton.Text = Resources.Cancel;
+					Cursor = Cursors.Cross;
 					break;
 				case FormState.ChangeColor:
 					changeColorButton.Text = Resources.Cancel;
@@ -335,36 +340,27 @@ namespace SimplePaint
 			drawingArea.Refresh();
 		}
 
-		private bool MoveVertex(Point point)
+		private void MoveVertex(Point point)
 		{
 			var deltaX = point.X - _mouseLastPosition.X;
 			var deltaY = point.Y - _mouseLastPosition.Y;
 
 			var selectedFigure = _shapeManager.SelectedFigure;
 			var vertex = selectedFigure.SelectedVertex;
-			if (!vertex.CanDrag(deltaX, deltaY, drawingArea.Bounds.Width, drawingArea.Bounds.Height)) return true;
-
-			Cursor = Cursors.Hand;
+			if (!vertex.CanDrag(deltaX, deltaY, drawingArea.Bounds.Width, drawingArea.Bounds.Height)) return;
+			
 			selectedFigure.MoveSelectedVertex(deltaX, deltaY);
-			drawingArea.Refresh();
-
-			_mouseLastPosition = point;
-			return false;
 		}
 
-		private bool MoveFigure(Point point)
+		private void MoveFigure(Point point)
 		{
 			var deltaX = point.X - _mouseLastPosition.X;
 			var deltaY = point.Y - _mouseLastPosition.Y;
 			var selectedFigure = _shapeManager.SelectedFigure;
 
-			if (!selectedFigure.CanDrag(deltaX, deltaY, drawingArea.Bounds.Width, drawingArea.Bounds.Height)) return false;
+			if (!selectedFigure.CanDrag(deltaX, deltaY, drawingArea.Bounds.Width, drawingArea.Bounds.Height)) return;
 
 			selectedFigure.Move(deltaX, deltaY);
-
-			_mouseLastPosition = point;
-			Cursor = Cursors.SizeAll;
-			return true;
 		}
 	}
 }

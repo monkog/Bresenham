@@ -102,9 +102,10 @@ namespace SimplePaint.Shapes
 			FigureColor = color;
 			StrokeThickness = strokeThickness;
 			Vertices = new LinkedList<CustomEllipse>();
-			Vertices.AddFirst(new CustomEllipse(point));
+			var firstVertex = new CustomEllipse(point);
+			Vertices.AddFirst(firstVertex);
 			FigureShapes = new LinkedList<IShape>();
-			FigureShapes.AddFirst(new CustomEllipse(point));
+			FigureShapes.AddFirst(firstVertex);
 			MultisamplingLine = null;
 			MultisamplingColor = Color.Azure;
 			UpdateBoundingBox();
@@ -244,7 +245,7 @@ namespace SimplePaint.Shapes
 		/// <param name="deltaY">Change in Y coordinate.</param>
 		public void Move(int deltaX, int deltaY)
 		{
-			foreach (var vertex in FigureShapes.OfType<CustomEllipse>())
+			foreach (var vertex in Vertices)
 				vertex.Position = new Point(vertex.Position.X + deltaX, vertex.Position.Y + deltaY);
 
 			foreach (var line in FigureShapes.OfType<CustomLine>())
@@ -252,9 +253,6 @@ namespace SimplePaint.Shapes
 				line.StartPoint = new Point(line.StartPoint.X + deltaX, line.StartPoint.Y + deltaY);
 				line.EndPoint = new Point(line.EndPoint.X + deltaX, line.EndPoint.Y + deltaY);
 			}
-
-			foreach (var vertex in Vertices)
-				vertex.Position = new Point(vertex.Position.X + deltaX, vertex.Position.Y + deltaY);
 
 			UpdateBoundingBox();
 		}
@@ -269,8 +267,8 @@ namespace SimplePaint.Shapes
 			var vertexNode = FigureShapes.First(v => v is CustomEllipse e && e.Position == SelectedVertex.Position);
 			var vertex = FigureShapes.Find(vertexNode);
 			UpdateLinesPositions(vertex, deltaX, deltaY);
-			(vertex.Value as CustomEllipse).Position = new Point(SelectedVertex.Position.X + deltaX, SelectedVertex.Position.Y + deltaY);
-			SelectedVertex.Position = new Point(SelectedVertex.Position.X + deltaX, SelectedVertex.Position.Y + deltaY);
+			var newPosition = new Point(SelectedVertex.Position.X + deltaX, SelectedVertex.Position.Y + deltaY);
+			SelectedVertex.Position = newPosition;
 
 			UpdateBoundingBox();
 		}
@@ -294,6 +292,16 @@ namespace SimplePaint.Shapes
 			return false;
 		}
 
+		/// <summary>
+		/// Draws a line between last vertex and the given location.
+		/// </summary>
+		/// <param name="point">The line's end point.</param>
+		public void DrawTemporaryLine(Point point)
+		{
+			if (FigureShapes.Last.Value is CustomLine) FigureShapes.Remove(FigureShapes.Last());
+			FigureShapes.AddLast(new CustomLine(LastVertex.Position, point));
+		}
+
 		private bool WillCloseFigure(Point point)
 		{
 			return FindVertexAtPoint(point) == FirstVertex;
@@ -303,8 +311,9 @@ namespace SimplePaint.Shapes
 		{
 			if (IsVertex(point, out _)) return;
 
-			Vertices.AddLast(new CustomEllipse(point));
-			FigureShapes.AddLast(new CustomEllipse(point));
+			var vertex = new CustomEllipse(point);
+			Vertices.AddLast(vertex);
+			FigureShapes.AddLast(vertex);
 
 			UpdateBoundingBox();
 		}
