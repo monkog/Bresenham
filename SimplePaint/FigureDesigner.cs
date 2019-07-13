@@ -82,32 +82,36 @@ namespace SimplePaint
 
 		private void MouseUpOccured(object sender, MouseEventArgs e)
 		{
-			_mouseUpPosition = new Point(e.X, e.Y);
+			_mouseUpPosition = e.Location;
 			_shapeManager.DeselectFigures();
-
-			// Add vertex to existing figure.
-			if (_formState == FormState.AddVertex)
+			
+			switch (_formState)
 			{
-				foreach (var figure in _shapeManager.Figures)
-				{
-					var line = figure.GetLineContainingPoint(_mouseUpPosition);
-					if (line == null) continue;
+				// Add vertex to existing figure.
+				case FormState.AddVertex:
+					{
+						foreach (var figure in _shapeManager.Figures)
+						{
+							var line = figure.GetLineContainingPoint(_mouseUpPosition);
+							if (line == null) continue;
 
-					figure.AddVertexOnLine(_mouseUpPosition, line);
-					drawingArea.Refresh();
-					return;
-				}
+							figure.AddVertexOnLine(_mouseUpPosition, line);
+							drawingArea.Refresh();
+							return;
+						}
+
+						break;
+					}
+				case FormState.DrawFigure:
+					AddNewVertex();
+					break;
+				case FormState.ChangeColor:
+					ChangeFigureColor(e.Location);
+					break;
+				case FormState.ChangeThickness:
+					ChangeFigureThickness(e.Location);
+					break;
 			}
-
-			if (_formState == FormState.DrawFigure)
-			{
-				AddNewVertex();
-				return;
-			}
-
-			if (_formState == FormState.ChangeColor && ChangeFigureColor(e.Location)) return;
-
-			if (_formState == FormState.ChangeThickness) ChangeFigureThickness(e.Location);
 		}
 
 		private void drawingArea_Paint(object sender, PaintEventArgs e)
@@ -252,7 +256,6 @@ namespace SimplePaint
 					break;
 				case FormState.AddVertex:
 					addVertexButton.Text = Resources.Cancel;
-					Cursor = Cursors.Cross;
 					break;
 				case FormState.ChangeColor:
 					changeColorButton.Text = Resources.Cancel;
@@ -271,34 +274,43 @@ namespace SimplePaint
 			}
 		}
 
-		private bool SetCursorImage(Point location)
+		private void SetCursorImage(Point location)
 		{
-			var isCursorOverFigure = _shapeManager.Figures.Any(figure => figure.GetLineContainingPoint(location) != null);
+			var isCursorOverFigure = _shapeManager.Figures.Any(figure => figure.ContainsPoint(location));
 
-			if (_formState == FormState.ChangeColor && isCursorOverFigure)
+			if (!isCursorOverFigure)
 			{
-				Cursor = _cursorManager.BucketCursor;
+				Cursor = Cursors.Default;
+				return;
 			}
-			else if (_formState == FormState.ChangeThickness && isCursorOverFigure)
+
+			var isCursorOverLine = _shapeManager.Figures.Any(figure => figure.GetLineContainingPoint(location) != null);
+
+			switch (_formState)
 			{
-				Cursor = _cursorManager.PenCursor;
-				return true;
-			}
-			else if (_formState != FormState.ChangeColor && _formState != FormState.ChangeThickness)
-			{
-				if (_shapeManager.Figures.Any(figure => figure.IsVertex(location, out _)))
-				{
+				case FormState.ChangeColor when isCursorOverLine:
+					Cursor = _cursorManager.BucketCursor;
+					break;
+				case FormState.Multisampling when isCursorOverLine:
+				case FormState.ChangeThickness when isCursorOverLine:
+					Cursor = _cursorManager.PenCursor;
+					break;
+				case FormState.AddVertex when isCursorOverLine:
+					Cursor = Cursors.Cross;
+					break;
+				case FormState.ChangeColor:
+				case FormState.ChangeThickness:
+				case FormState.AddVertex:
+				case FormState.Multisampling:
+					Cursor = Cursors.Default;
+					break;
+				case FormState.Default when _shapeManager.Figures.Any(figure => figure.IsVertex(location, out _)):
 					Cursor = Cursors.Hand;
-					return true;
-				}
-
-				if (_shapeManager.Figures.Any(figure => figure.ContainsPoint(location)))
-				{
+					break;
+				case FormState.Default:
 					Cursor = Cursors.SizeAll;
-					return true;
-				}
+					break;
 			}
-			return false;
 		}
 
 		private void ChangeFigureThickness(Point location)
@@ -348,7 +360,7 @@ namespace SimplePaint
 			var selectedFigure = _shapeManager.SelectedFigure;
 			var vertex = selectedFigure.SelectedVertex;
 			if (!vertex.CanDrag(deltaX, deltaY, drawingArea.Bounds.Width, drawingArea.Bounds.Height)) return;
-			
+
 			selectedFigure.MoveSelectedVertex(deltaX, deltaY);
 		}
 
