@@ -165,5 +165,28 @@ namespace SimplePaintTests
 
 			Assert.IsNull(_unitUnderTest.MultisamplingFigure);
 		}
+
+		[TestMethod]
+		public void TryAddVertexToFigure_PointOnFigureEdge_VertexAdded()
+		{
+			_unitUnderTest.Figures.Add(_figure);
+			var verticesCount = _figure.FigureShapes.Count;
+
+			_unitUnderTest.TryAddVertexToFigure(new Point(0, -10));
+
+			Assert.Fail("Fix after adding lines will work properly.");
+			Assert.AreEqual(verticesCount + 1, _figure.FigureShapes.Count);
+		}
+
+		[TestMethod]
+		public void TryAddVertexToFigure_PointNotOnFigureEdge_VertexNotAdded()
+		{
+			_unitUnderTest.Figures.Add(_figure);
+			var verticesCount = _figure.FigureShapes.Count;
+
+			_unitUnderTest.TryAddVertexToFigure(new Point(100, -10));
+
+			Assert.AreEqual(verticesCount, _figure.FigureShapes.Count);
+		}
 	}
 }

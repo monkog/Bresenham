@@ -87,21 +87,10 @@ namespace SimplePaint
 			
 			switch (_formState)
 			{
-				// Add vertex to existing figure.
 				case FormState.AddVertex:
-					{
-						foreach (var figure in _shapeManager.Figures)
-						{
-							var line = figure.GetLineContainingPoint(_mouseUpPosition);
-							if (line == null) continue;
-
-							figure.AddVertexOnLine(_mouseUpPosition, line);
-							drawingArea.Refresh();
-							return;
-						}
-
-						break;
-					}
+					_shapeManager.TryAddVertexToFigure(e.Location);
+					drawingArea.Refresh();
+					break;
 				case FormState.DrawFigure:
 					AddNewVertex();
 					break;

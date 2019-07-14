@@ -98,5 +98,21 @@ namespace SimplePaint
 				figure.MultisamplingLine = line;
 			}
 		}
+
+		/// <summary>
+		/// Tries to add a vertex at given position.
+		/// </summary>
+		/// <param name="point">Position of the new vertex.</param>
+		public void TryAddVertexToFigure(Point point)
+		{
+			foreach (var figure in Figures)
+			{
+				var line = figure.GetLineContainingPoint(point);
+				if (line == null) continue;
+
+				figure.AddVertexOnLine(point, line);
+				return;
+			}
+		}
 	}
 }
