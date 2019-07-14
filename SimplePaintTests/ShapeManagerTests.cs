@@ -188,5 +188,51 @@ namespace SimplePaintTests
 
 			Assert.AreEqual(verticesCount, _figure.FigureShapes.Count);
 		}
+
+		[TestMethod]
+		public void ChangeFigureColor_PointOnFigureEdge_ColorChanged()
+		{
+			_unitUnderTest.Figures.Add(_figure);
+
+			var newColor = Color.White;
+			_unitUnderTest.ChangeFigureColor(newColor, new Point(0, -10));
+
+			Assert.Fail("Fix after adding lines will work properly.");
+			Assert.AreEqual(newColor, _figure.FigureColor);
+		}
+
+		[TestMethod]
+		public void ChangeFigureColor_PointNotOnFigureEdge_ColorNotChanged()
+		{
+			_unitUnderTest.Figures.Add(_figure);
+			var color = _figure.FigureColor;
+
+			_unitUnderTest.ChangeFigureColor(Color.White, new Point(100, -10));
+
+			Assert.AreEqual(color, _figure.FigureColor);
+		}
+
+		[TestMethod]
+		public void ChangeFigureThickness_PointOnFigureEdge_ThicknessChanged()
+		{
+			_unitUnderTest.Figures.Add(_figure);
+
+			const int newThickness = 22;
+			_unitUnderTest.ChangeFigureThickness(newThickness, new Point(0, -10));
+
+			Assert.Fail("Fix after adding lines will work properly.");
+			Assert.AreEqual(newThickness, _figure.FigureColor);
+		}
+
+		[TestMethod]
+		public void ChangeFigureThickness_PointNotOnFigureEdge_ThicknessNotChanged()
+		{
+			_unitUnderTest.Figures.Add(_figure);
+			var thickness = _figure.StrokeThickness;
+
+			_unitUnderTest.ChangeFigureThickness(22, new Point(100, -10));
+
+			Assert.AreEqual(thickness, _figure.StrokeThickness);
+		}
 	}
 }

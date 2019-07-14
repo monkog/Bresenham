@@ -114,5 +114,39 @@ namespace SimplePaint
 				return;
 			}
 		}
+
+		/// <summary>
+		/// Searches for a figure at given point and changes its color to the given one.
+		/// </summary>
+		/// <param name="color">Color to change to.</param>
+		/// <param name="point">Location of the figure.</param>
+		public void ChangeFigureColor(Color color, Point point)
+		{
+			foreach (var figure in Figures)
+			{
+				var line = figure.GetLineContainingPoint(point);
+				if (line == null) continue;
+
+				figure.FigureColor = color;
+				return;
+			}
+		}
+
+		/// <summary>
+		/// Searches for a figure at given point and changes its stroke thickness to the given one.
+		/// </summary>
+		/// <param name="thickness">Desired thickness.</param>
+		/// <param name="point">Location of the figure.</param>
+		public void ChangeFigureThickness(int thickness, Point point)
+		{
+			foreach (var figure in Figures)
+			{
+				var line = figure.GetLineContainingPoint(point);
+				if (line == null) continue;
+
+				figure.StrokeThickness = thickness;
+				return;
+			}
+		}
 	}
 }

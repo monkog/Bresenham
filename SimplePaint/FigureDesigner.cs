@@ -89,18 +89,25 @@ namespace SimplePaint
 			{
 				case FormState.AddVertex:
 					_shapeManager.TryAddVertexToFigure(e.Location);
-					drawingArea.Refresh();
 					break;
 				case FormState.DrawFigure:
-					AddNewVertex();
+					if (_shapeManager.CurrentFigure == null)
+					{
+						_shapeManager.StartDrawingFigure(_mouseUpPosition, colorPictureBox.BackColor, _strokeThickness);
+						break;
+					}
+
+					_shapeManager.TryAddVertexToCurrentFigure(_mouseUpPosition);
 					break;
 				case FormState.ChangeColor:
-					ChangeFigureColor(e.Location);
+					_shapeManager.ChangeFigureColor(colorPictureBox.BackColor, e.Location);
 					break;
 				case FormState.ChangeThickness:
-					ChangeFigureThickness(e.Location);
+					_shapeManager.ChangeFigureThickness(_strokeThickness, e.Location);
 					break;
 			}
+
+			drawingArea.Refresh();
 		}
 
 		private void drawingArea_Paint(object sender, PaintEventArgs e)
@@ -300,45 +307,6 @@ namespace SimplePaint
 					Cursor = Cursors.SizeAll;
 					break;
 			}
-		}
-
-		private void ChangeFigureThickness(Point location)
-		{
-			foreach (var figure in _shapeManager.Figures)
-			{
-				var line = figure.GetLineContainingPoint(location);
-				if (line == null) continue;
-
-				figure.StrokeThickness = _strokeThickness;
-				drawingArea.Refresh();
-				return;
-			}
-		}
-
-		private bool ChangeFigureColor(Point location)
-		{
-			foreach (var figure in _shapeManager.Figures)
-			{
-				var line = figure.GetLineContainingPoint(location);
-				if (line == null) continue;
-
-				figure.FigureColor = colorPictureBox.BackColor;
-				drawingArea.Refresh();
-				return true;
-			}
-
-			return false;
-		}
-
-		private void AddNewVertex()
-		{
-			if (_shapeManager.CurrentFigure == null)
-			{
-				_shapeManager.StartDrawingFigure(_mouseUpPosition, colorPictureBox.BackColor, _strokeThickness);
-			}
-
-			_shapeManager.TryAddVertexToCurrentFigure(_mouseUpPosition);
-			drawingArea.Refresh();
 		}
 
 		private void MoveVertex(Point point)
