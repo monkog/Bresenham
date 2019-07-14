@@ -110,7 +110,7 @@ namespace SimplePaint
 			drawingArea.Refresh();
 		}
 
-		private void drawingArea_Paint(object sender, PaintEventArgs e)
+		private void RedrawDrawingArea(object sender, PaintEventArgs e)
 		{
 			if (_shapeManager.CurrentFigure != null)
 				foreach (IShape shape in _shapeManager.CurrentFigure.FigureShapes)
@@ -138,7 +138,7 @@ namespace SimplePaint
 			}
 		}
 
-		private void drawFigureButton_Click(object sender, EventArgs e)
+		private void ToDrawFigureState(object sender, EventArgs e)
 		{
 			if (_formState == FormState.DrawFigure)
 			{
@@ -151,7 +151,7 @@ namespace SimplePaint
 			SetFormState(FormState.DrawFigure);
 		}
 
-		private void addVertexButton_Click(object sender, EventArgs e)
+		private void ToAddVertexState(object sender, EventArgs e)
 		{
 			if (_formState == FormState.AddVertex)
 			{
@@ -169,12 +169,7 @@ namespace SimplePaint
 			Cursor = Cursors.Cross;
 		}
 
-		private void clearButton_Click(object sender, EventArgs e)
-		{
-			SetDefaultSettings();
-		}
-
-		private void changeColorButton_Click(object sender, EventArgs e)
+		private void ToChangeColorState(object sender, EventArgs e)
 		{
 			if (_formState == FormState.DrawFigure && _shapeManager.CurrentFigure != null && _shapeManager.CurrentFigure.Vertices.Any())
 			{
@@ -197,7 +192,7 @@ namespace SimplePaint
 			if (_formState != FormState.DrawFigure) SetFormState(FormState.ChangeColor);
 		}
 
-		private void changeSizeButton_Click(object sender, EventArgs e)
+		private void ToChangeThicknessState(object sender, EventArgs e)
 		{
 			if (_formState == FormState.DrawFigure && _shapeManager.CurrentFigure != null && _shapeManager.CurrentFigure.Vertices.Any())
 			{
@@ -220,13 +215,13 @@ namespace SimplePaint
 			sizeLabel.Text = "CURRENT SIZE: " + enterValueWindow.LineThickness + " px";
 		}
 
-		private void multisamplingButton_Click(object sender, EventArgs e)
+		private void ToMultisamplingState(object sender, EventArgs e)
 		{
 			var state = _formState == FormState.Multisampling ? FormState.Default : FormState.Multisampling;
 			SetFormState(state);
 		}
 
-		private void SetDefaultSettings()
+		private void SetDefaultSettings(object sender, EventArgs e)
 		{
 			SetFormState(FormState.Default);
 

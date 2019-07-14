@@ -56,7 +56,7 @@
 			this.drawingArea.Size = new System.Drawing.Size(793, 604);
 			this.drawingArea.TabIndex = 0;
 			this.drawingArea.TabStop = false;
-			this.drawingArea.Paint += new System.Windows.Forms.PaintEventHandler(this.drawingArea_Paint);
+			this.drawingArea.Paint += new System.Windows.Forms.PaintEventHandler(this.RedrawDrawingArea);
 			this.drawingArea.MouseDown += new System.Windows.Forms.MouseEventHandler(this.MouseDownOccured);
 			this.drawingArea.MouseMove += new System.Windows.Forms.MouseEventHandler(this.MouseMoveOccured);
 			this.drawingArea.MouseUp += new System.Windows.Forms.MouseEventHandler(this.MouseUpOccured);
@@ -90,7 +90,7 @@
 			this.multisamplingButton.TabIndex = 8;
 			this.multisamplingButton.Text = "MULTISAMPLING";
 			this.multisamplingButton.UseVisualStyleBackColor = true;
-			this.multisamplingButton.Click += new System.EventHandler(this.multisamplingButton_Click);
+			this.multisamplingButton.Click += new System.EventHandler(this.ToMultisamplingState);
 			// 
 			// sizeLabel
 			// 
@@ -114,7 +114,7 @@
 			this.changeSizeButton.TabIndex = 6;
 			this.changeSizeButton.Text = "CHANGE SIZE";
 			this.changeSizeButton.UseVisualStyleBackColor = true;
-			this.changeSizeButton.Click += new System.EventHandler(this.changeSizeButton_Click);
+			this.changeSizeButton.Click += new System.EventHandler(this.ToChangeThicknessState);
 			// 
 			// colorPictureBox
 			// 
@@ -148,7 +148,7 @@
 			this.changeColorButton.TabIndex = 3;
 			this.changeColorButton.Text = "CHANGE COLOR";
 			this.changeColorButton.UseVisualStyleBackColor = true;
-			this.changeColorButton.Click += new System.EventHandler(this.changeColorButton_Click);
+			this.changeColorButton.Click += new System.EventHandler(this.ToChangeColorState);
 			// 
 			// clearButton
 			// 
@@ -159,7 +159,7 @@
 			this.clearButton.TabIndex = 2;
 			this.clearButton.Text = "CLEAR";
 			this.clearButton.UseVisualStyleBackColor = true;
-			this.clearButton.Click += new System.EventHandler(this.clearButton_Click);
+			this.clearButton.Click += new System.EventHandler(this.SetDefaultSettings);
 			// 
 			// drawFigureButton
 			// 
@@ -170,7 +170,7 @@
 			this.drawFigureButton.TabIndex = 1;
 			this.drawFigureButton.Text = "DRAW FIGURE";
 			this.drawFigureButton.UseVisualStyleBackColor = true;
-			this.drawFigureButton.Click += new System.EventHandler(this.drawFigureButton_Click);
+			this.drawFigureButton.Click += new System.EventHandler(this.ToDrawFigureState);
 			// 
 			// addVertexButton
 			// 
@@ -181,7 +181,7 @@
 			this.addVertexButton.TabIndex = 0;
 			this.addVertexButton.Text = "ADD VERTEX";
 			this.addVertexButton.UseVisualStyleBackColor = true;
-			this.addVertexButton.Click += new System.EventHandler(this.addVertexButton_Click);
+			this.addVertexButton.Click += new System.EventHandler(this.ToAddVertexState);
 			// 
 			// FigureDesigner
 			// 
