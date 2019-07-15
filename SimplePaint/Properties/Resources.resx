@@ -148,4 +148,7 @@
   <data name="Multisampling" xml:space="preserve">
     <value>MULTISAMPLING</value>
   </data>
+  <data name="CurrentSize" xml:space="preserve">
+    <value>CURRENT SIZE: {0} px</value>
+  </data>
 </root>

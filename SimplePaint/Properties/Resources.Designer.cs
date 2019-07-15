@@ -107,6 +107,15 @@ namespace SimplePaint.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to CURRENT SIZE: {0} px.
+        /// </summary>
+        internal static string CurrentSize {
+            get {
+                return ResourceManager.GetString("CurrentSize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to DRAW FIGURE.
         /// </summary>
         internal static string DrawFigure {

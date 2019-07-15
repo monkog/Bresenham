@@ -91,6 +91,9 @@ namespace SimplePaint
 					_shapeManager.TryAddVertexToFigure(e.Location);
 					break;
 				case FormState.DrawFigure:
+					changeColorButton.Enabled = false;
+					changeSizeButton.Enabled = false;
+
 					if (_shapeManager.CurrentFigure == null)
 					{
 						_shapeManager.StartDrawingFigure(_mouseUpPosition, colorPictureBox.BackColor, _strokeThickness);
@@ -98,6 +101,12 @@ namespace SimplePaint
 					}
 
 					_shapeManager.TryAddVertexToCurrentFigure(_mouseUpPosition);
+					if (_shapeManager.CurrentFigure == null)
+					{
+						changeColorButton.Enabled = true;
+						changeSizeButton.Enabled = true;
+					}
+
 					break;
 				case FormState.ChangeColor:
 					_shapeManager.ChangeFigureColor(colorPictureBox.BackColor, e.Location);
@@ -159,24 +168,12 @@ namespace SimplePaint
 				return;
 			}
 
-			if (!_shapeManager.Figures.Any() || (_formState == FormState.DrawFigure && _shapeManager.CurrentFigure != null))
-			{
-				MessageBox.Show("You have to finish drawing at least one figure to use this functionality.", "Don't do that!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-				return;
-			}
-
 			SetFormState(FormState.AddVertex);
 			Cursor = Cursors.Cross;
 		}
 
 		private void ToChangeColorState(object sender, EventArgs e)
 		{
-			if (_formState == FormState.DrawFigure && _shapeManager.CurrentFigure != null && _shapeManager.CurrentFigure.Vertices.Any())
-			{
-				MessageBox.Show("You have to finish drawing to use this functionality.", "Don't do that!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-				return;
-			}
-
 			if (_formState == FormState.ChangeColor)
 			{
 				SetFormState(FormState.Default);
@@ -194,12 +191,6 @@ namespace SimplePaint
 
 		private void ToChangeThicknessState(object sender, EventArgs e)
 		{
-			if (_formState == FormState.DrawFigure && _shapeManager.CurrentFigure != null && _shapeManager.CurrentFigure.Vertices.Any())
-			{
-				MessageBox.Show("You have to finish drawing to use this functionality.", "Don't do that!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-				return;
-			}
-
 			if (_formState == FormState.ChangeThickness)
 			{
 				SetFormState(FormState.Default);
@@ -209,10 +200,9 @@ namespace SimplePaint
 			var enterValueWindow = new EnterValueWindow();
 			enterValueWindow.ShowDialog();
 
-			if (_formState != FormState.DrawFigure) SetFormState(FormState.ChangeThickness);
-
 			_strokeThickness = enterValueWindow.LineThickness;
-			sizeLabel.Text = "CURRENT SIZE: " + enterValueWindow.LineThickness + " px";
+			if (_formState != FormState.DrawFigure) SetFormState(FormState.ChangeThickness);
+			sizeLabel.Text = string.Format(Resources.CurrentSize, enterValueWindow.LineThickness);
 		}
 
 		private void ToMultisamplingState(object sender, EventArgs e)
@@ -243,22 +233,52 @@ namespace SimplePaint
 			{
 				case FormState.DrawFigure:
 					drawFigureButton.Text = Resources.Cancel;
+					addVertexButton.Enabled = false;
+					changeColorButton.Enabled = true;
+					changeSizeButton.Enabled = true;
+					drawFigureButton.Enabled = true;
+					multisamplingButton.Enabled = false;
 					Cursor = Cursors.Cross;
 					break;
 				case FormState.AddVertex:
 					addVertexButton.Text = Resources.Cancel;
+					addVertexButton.Enabled = true;
+					changeColorButton.Enabled = false;
+					changeSizeButton.Enabled = false;
+					drawFigureButton.Enabled = false;
+					multisamplingButton.Enabled = false;
 					break;
 				case FormState.ChangeColor:
 					changeColorButton.Text = Resources.Cancel;
+					addVertexButton.Enabled = false;
+					changeColorButton.Enabled = true;
+					changeSizeButton.Enabled = false;
+					drawFigureButton.Enabled = false;
+					multisamplingButton.Enabled = false;
 					break;
 				case FormState.Multisampling:
 					multisamplingButton.Text = Resources.Cancel;
+					addVertexButton.Enabled = false;
+					changeColorButton.Enabled = false;
+					changeSizeButton.Enabled = false;
+					drawFigureButton.Enabled = false;
+					multisamplingButton.Enabled = true;
 					break;
 				case FormState.ChangeThickness:
 					changeSizeButton.Text = Resources.Cancel;
+					addVertexButton.Enabled = false;
+					changeColorButton.Enabled = false;
+					changeSizeButton.Enabled = true;
+					drawFigureButton.Enabled = false;
+					multisamplingButton.Enabled = false;
 					break;
 				case FormState.Default:
 					Cursor = Cursors.Default;
+					addVertexButton.Enabled = true;
+					changeColorButton.Enabled = true;
+					changeSizeButton.Enabled = true;
+					drawFigureButton.Enabled = true;
+					multisamplingButton.Enabled = true;
 					break;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(state), state, null);
