@@ -15,26 +15,6 @@ namespace SimplePaint.Shapes
 		private readonly Color _multisamplingColor = Color.Azure;
 
 		/// <summary>
-		/// Gets the first node in the LinkedList.
-		/// </summary>
-		public LinkedListNode<CustomEllipse> FirstNode => Vertices.First;
-
-		/// <summary>
-		/// Gets the last node in the LinkedList.
-		/// </summary>
-		public LinkedListNode<CustomEllipse> LastNode => Vertices.Last;
-
-		/// <summary>
-		/// Gets the first vertex.
-		/// </summary>
-		public CustomEllipse FirstVertex => FirstNode.Value;
-
-		/// <summary>
-		/// Gets the last vertex.
-		/// </summary>
-		public CustomEllipse LastVertex => LastNode.Value;
-
-		/// <summary>
 		/// Gets or sets the color of the figure.
 		/// </summary>
 		public Color FigureColor { get; set; }
@@ -142,8 +122,8 @@ namespace SimplePaint.Shapes
 		{
 			if (IsOutsideBoundingBox(point)) return false;
 
-			var currentVertex = FirstNode;
-			var previousVertex = LastNode;
+			var currentVertex = Vertices.First;
+			var previousVertex = Vertices.Last;
 
 			var isInFigure = false;
 
@@ -282,8 +262,10 @@ namespace SimplePaint.Shapes
 				return true;
 			}
 
+			var firstVertex = Vertices.First.Value;
+			var lastVertex = Vertices.Last.Value;
 			FigureShapes.Remove(FigureShapes.OfType<CustomLine>().LastOrDefault());
-			FigureShapes.AddLast(new CustomLine(LastVertex.Position, FirstVertex.Position));
+			FigureShapes.AddLast(new CustomLine(lastVertex.Position, firstVertex.Position));
 
 			return false;
 		}
@@ -295,7 +277,8 @@ namespace SimplePaint.Shapes
 		public void DrawTemporaryLine(Point point)
 		{
 			if (FigureShapes.Last.Value is CustomLine) FigureShapes.Remove(FigureShapes.Last());
-			FigureShapes.AddLast(new CustomLine(LastVertex.Position, point));
+			var lastVertex = Vertices.Last.Value;
+			FigureShapes.AddLast(new CustomLine(lastVertex.Position, point));
 		}
 
 		/// <summary>
@@ -314,7 +297,7 @@ namespace SimplePaint.Shapes
 
 		private bool WillCloseFigure(Point point)
 		{
-			return FindVertexAtPoint(point) == FirstVertex;
+			return FindVertexAtPoint(point) == Vertices.First.Value;
 		}
 
 		private void AddVertex(Point point)
