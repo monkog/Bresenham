@@ -84,7 +84,7 @@ namespace SimplePaint
 		{
 			_mouseUpPosition = e.Location;
 			_shapeManager.DeselectFigures();
-			
+
 			switch (_formState)
 			{
 				case FormState.AddVertex:
@@ -121,30 +121,11 @@ namespace SimplePaint
 
 		private void RedrawDrawingArea(object sender, PaintEventArgs e)
 		{
-			if (_shapeManager.CurrentFigure != null)
-				foreach (IShape shape in _shapeManager.CurrentFigure.FigureShapes)
-					shape.Draw(e.Graphics, _shapeManager.CurrentFigure.FigureColor, _shapeManager.CurrentFigure.StrokeThickness);
-			if (!_shapeManager.Figures.Any()) return;
-			var multisamplingFigure = _shapeManager.MultisamplingFigure;
+			var withMultisampling = _formState == FormState.Multisampling;
+			foreach (var figure in _shapeManager.Figures)
+				figure.Draw(e.Graphics, withMultisampling);
 
-			foreach (CustomFigure figure in _shapeManager.Figures)
-			{
-				if (_formState == FormState.Multisampling && multisamplingFigure == figure)
-				{
-					foreach (IShape shape in figure.FigureShapes)
-						if (shape.GetType() == typeof(CustomLine))
-						{
-							CustomLine line = shape as CustomLine;
-							var color = line == multisamplingFigure.MultisamplingLine ? figure.MultisamplingColor : figure.FigureColor;
-							shape.Draw(e.Graphics, color, figure.StrokeThickness);
-						}
-						else
-							shape.Draw(e.Graphics, figure.FigureColor, figure.StrokeThickness);
-				}
-				else
-					foreach (IShape shape in figure.FigureShapes)
-						shape.Draw(e.Graphics, figure.FigureColor, figure.StrokeThickness);
-			}
+			_shapeManager.CurrentFigure?.Draw(e.Graphics, withMultisampling);
 		}
 
 		private void ToDrawFigureState(object sender, EventArgs e)

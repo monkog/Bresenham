@@ -12,6 +12,8 @@ namespace SimplePaint.Shapes
 	{
 		private const int Delta = 10;
 
+		private readonly Color _multisamplingColor = Color.Azure;
+
 		/// <summary>
 		/// Gets the first node in the LinkedList.
 		/// </summary>
@@ -87,11 +89,6 @@ namespace SimplePaint.Shapes
 		public CustomLine MultisamplingLine { get; set; }
 
 		/// <summary>
-		/// Gets or sets the color of the multi-sampling.
-		/// </summary>
-		public Color MultisamplingColor { get; set; }
-
-		/// <summary>
 		/// Initializes a new instance of the <see cref="CustomFigure"/> class.
 		/// </summary>
 		/// <param name="point">The position point.</param>
@@ -107,7 +104,6 @@ namespace SimplePaint.Shapes
 			FigureShapes = new LinkedList<IShape>();
 			FigureShapes.AddFirst(firstVertex);
 			MultisamplingLine = null;
-			MultisamplingColor = Color.Azure;
 			UpdateBoundingBox();
 		}
 
@@ -300,6 +296,20 @@ namespace SimplePaint.Shapes
 		{
 			if (FigureShapes.Last.Value is CustomLine) FigureShapes.Remove(FigureShapes.Last());
 			FigureShapes.AddLast(new CustomLine(LastVertex.Position, point));
+		}
+
+		/// <summary>
+		/// Draws the custom figure.
+		/// </summary>
+		/// <param name="graphics">Graphics instance.</param>
+		/// <param name="withMultisampling">Determines whether multisampling algorithm should be used.</param>
+		public void Draw(Graphics graphics, bool withMultisampling = false)
+		{
+			foreach (var shape in FigureShapes.Where(shape => shape != MultisamplingLine))
+				shape.Draw(graphics, FigureColor, StrokeThickness);
+
+			var color = withMultisampling ? _multisamplingColor : FigureColor;
+			MultisamplingLine?.Draw(graphics, color, StrokeThickness);
 		}
 
 		private bool WillCloseFigure(Point point)
