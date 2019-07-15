@@ -105,11 +105,12 @@ namespace SimplePaint.Shapes
 
 			FigureShapes.Remove(line);
 
-			FigureShapes.AddAfter(lineStart, new CustomLine(previousEllipse.Position, point));
-			FigureShapes.AddAfter(lineStart.Next, new CustomEllipse(point));
-			FigureShapes.AddAfter(lineStart.Next.Next, new CustomLine(point, nextEllipse.Position));
+			var newVertex = new CustomEllipse(point);
+			FigureShapes.AddAfter(lineStart, new CustomLine(previousEllipse, newVertex));
+			FigureShapes.AddAfter(lineStart.Next, newVertex);
+			FigureShapes.AddAfter(lineStart.Next.Next, new CustomLine(newVertex, nextEllipse));
 
-			Vertices.AddAfter(Vertices.Find(FindVertexAtPoint(previousEllipse.Position)), new CustomEllipse(point));
+			Vertices.AddAfter(Vertices.Find(FindVertexAtPoint(previousEllipse.Position)), newVertex);
 			UpdateBoundingBox();
 		}
 
@@ -151,12 +152,14 @@ namespace SimplePaint.Shapes
 		{
 			foreach (var line in FigureShapes.OfType<CustomLine>())
 			{
-				var lineLength = Math.Sqrt((line.StartPoint.X - line.EndPoint.X) * (line.StartPoint.X - line.EndPoint.X)
-								   + (line.StartPoint.Y - line.EndPoint.Y) * (line.StartPoint.Y - line.EndPoint.Y));
-				var distanceFromStart = Math.Sqrt((point.X - line.StartPoint.X) * (point.X - line.StartPoint.X)
-								   + (point.Y - line.StartPoint.Y) * (point.Y - line.StartPoint.Y));
-				var distanceFromEnd = Math.Sqrt((point.X - line.EndPoint.X) * (point.X - line.EndPoint.X)
-								   + (point.Y - line.EndPoint.Y) * (point.Y - line.EndPoint.Y));
+				var startX = line.StartPoint.Position.X;
+				var startY = line.StartPoint.Position.Y;
+				var endX = line.EndPoint.Position.X;
+				var endY = line.EndPoint.Position.Y;
+
+				var lineLength = Math.Sqrt((startX - endX) * (startX - endX) + (startY - endY) * (startY - endY));
+				var distanceFromStart = Math.Sqrt((point.X - startX) * (point.X - startX) + (point.Y - startY) * (point.Y - startY));
+				var distanceFromEnd = Math.Sqrt((point.X - endX) * (point.X - endX) + (point.Y - endY) * (point.Y - endY));
 
 				if (!(distanceFromStart + distanceFromEnd < lineLength + 2) || !(distanceFromStart + distanceFromEnd > lineLength - 2)) continue;
 				return line;
@@ -224,12 +227,6 @@ namespace SimplePaint.Shapes
 			foreach (var vertex in Vertices)
 				vertex.Position = new Point(vertex.Position.X + deltaX, vertex.Position.Y + deltaY);
 
-			foreach (var line in FigureShapes.OfType<CustomLine>())
-			{
-				line.StartPoint = new Point(line.StartPoint.X + deltaX, line.StartPoint.Y + deltaY);
-				line.EndPoint = new Point(line.EndPoint.X + deltaX, line.EndPoint.Y + deltaY);
-			}
-
 			UpdateBoundingBox();
 		}
 
@@ -240,9 +237,6 @@ namespace SimplePaint.Shapes
 		/// <param name="deltaY">Change in Y coordinate.</param>
 		public void MoveSelectedVertex(int deltaX, int deltaY)
 		{
-			var vertexNode = FigureShapes.First(v => v is CustomEllipse e && e.Position == SelectedVertex.Position);
-			var vertex = FigureShapes.Find(vertexNode);
-			UpdateLinesPositions(vertex, deltaX, deltaY);
 			var newPosition = new Point(SelectedVertex.Position.X + deltaX, SelectedVertex.Position.Y + deltaY);
 			SelectedVertex.Position = newPosition;
 
@@ -265,7 +259,8 @@ namespace SimplePaint.Shapes
 			var firstVertex = Vertices.First.Value;
 			var lastVertex = Vertices.Last.Value;
 			FigureShapes.Remove(FigureShapes.OfType<CustomLine>().LastOrDefault());
-			FigureShapes.AddLast(new CustomLine(lastVertex.Position, firstVertex.Position));
+			FigureShapes.AddLast(new CustomLine(lastVertex, firstVertex));
+			UpdateBoundingBox();
 
 			return false;
 		}
@@ -278,7 +273,7 @@ namespace SimplePaint.Shapes
 		{
 			if (FigureShapes.Last.Value is CustomLine) FigureShapes.Remove(FigureShapes.Last());
 			var lastVertex = Vertices.Last.Value;
-			FigureShapes.AddLast(new CustomLine(lastVertex.Position, point));
+			FigureShapes.AddLast(new CustomLine(lastVertex, new CustomEllipse(point)));
 		}
 
 		/// <summary>
@@ -305,19 +300,13 @@ namespace SimplePaint.Shapes
 			if (IsVertex(point, out _)) return;
 
 			var vertex = new CustomEllipse(point);
+			FigureShapes.Remove(FigureShapes.OfType<CustomLine>().LastOrDefault());
+			FigureShapes.AddLast(new CustomLine(Vertices.Last.Value, vertex));
+
 			Vertices.AddLast(vertex);
 			FigureShapes.AddLast(vertex);
 
 			UpdateBoundingBox();
-		}
-
-		private void UpdateLinesPositions(LinkedListNode<IShape> node, int deltaX, int deltaY)
-		{
-			var previousLine = node.Previous?.Value as CustomLine ?? FigureShapes.Last.Value as CustomLine;
-			previousLine.EndPoint = new Point(previousLine.EndPoint.X + deltaX, previousLine.EndPoint.Y + deltaY);
-
-			var nextLine = node.Next?.Value as CustomLine ?? FigureShapes.First.Value as CustomLine;
-			nextLine.StartPoint = new Point(nextLine.StartPoint.X + deltaX, nextLine.StartPoint.Y + deltaY);
 		}
 
 		private void UpdateBoundingBox()

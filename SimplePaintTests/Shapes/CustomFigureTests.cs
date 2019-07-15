@@ -61,7 +61,7 @@ namespace SimplePaintTests.Shapes
 			var result = _unitUnderTest.IsVertex(new Point(x, y), out var vertex);
 
 			Assert.IsTrue(result);
-			Assert.AreEqual(_unitUnderTest.FirstNode.Value, vertex);
+			Assert.AreEqual(_unitUnderTest.Vertices.First.Value, vertex);
 		}
 
 		[DataTestMethod]
@@ -118,7 +118,8 @@ namespace SimplePaintTests.Shapes
 			var point = new Point(20, 20);
 			var vertexCount = _unitUnderTest.Vertices.Count;
 
-			_unitUnderTest.AddVertexOnLine(point, new CustomLine(point, point));
+			var line = new CustomLine(new CustomEllipse(point),new CustomEllipse(point));
+			_unitUnderTest.AddVertexOnLine(point, line);
 
 			Assert.AreEqual(vertexCount, _unitUnderTest.Vertices.Count);
 		}
@@ -240,7 +241,7 @@ namespace SimplePaintTests.Shapes
 		[TestMethod]
 		public void GetLineContainingPoint_NoLineContainsPoint_Null()
 		{
-			var line = new CustomLine(new Point(1, 2), new Point(1, 4));
+			var line = new CustomLine(new CustomEllipse(new Point(1, 2)), new CustomEllipse(new Point(1, 4)));
 			_unitUnderTest.FigureShapes.AddLast(line);
 
 			var result = _unitUnderTest.GetLineContainingPoint(new Point(7, 9));
@@ -251,7 +252,7 @@ namespace SimplePaintTests.Shapes
 		[TestMethod]
 		public void GetLineContainingPoint_LineContainsPoint_Line()
 		{
-			var line = new CustomLine(new Point(1, 2), new Point(1, 4));
+			var line = new CustomLine(new CustomEllipse(new Point(1, 2)), new CustomEllipse(new Point(1, 4)));
 			_unitUnderTest.FigureShapes.AddLast(line);
 
 			var result = _unitUnderTest.GetLineContainingPoint(new Point(1, 3));
@@ -263,7 +264,7 @@ namespace SimplePaintTests.Shapes
 		[TestMethod]
 		public void GetLineContainingPoint_PointCloseToLine_Line()
 		{
-			var line = new CustomLine(new Point(1, 2), new Point(1, 4));
+			var line = new CustomLine(new CustomEllipse(new Point(1, 2)), new CustomEllipse(new Point(1, 4)));
 			_unitUnderTest.FigureShapes.AddLast(line);
 
 			var result = _unitUnderTest.GetLineContainingPoint(new Point(2, 3));
@@ -340,7 +341,7 @@ namespace SimplePaintTests.Shapes
 		[TestMethod]
 		public void DrawTemporaryLine_Always_LastTemporaryLineRemoved()
 		{
-			var lastLine = new CustomLine(new Point(1, 10), new Point(20, 50));
+			var lastLine = new CustomLine(new CustomEllipse(new Point(1, 10)), new CustomEllipse(new Point(20, 50)));
 			_unitUnderTest.FigureShapes.AddLast(lastLine);
 
 			_unitUnderTest.DrawTemporaryLine(new Point(100, 100));

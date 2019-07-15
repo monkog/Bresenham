@@ -62,7 +62,9 @@ namespace SimplePaintTests
 		public void MultisamplingFigure_FigureWithLineSelected_Figure()
 		{
 			_unitUnderTest.Figures.Add(_figure);
-			_figure.MultisamplingLine = new CustomLine(new Point(0, 0), new Point(100, 100));
+			var from = new CustomEllipse(new Point(0, 0));
+			var to = new CustomEllipse(new Point(100, 100));
+			_figure.MultisamplingLine = new CustomLine(from, to);
 
 			Assert.AreEqual(_figure, _unitUnderTest.MultisamplingFigure);
 		}
@@ -84,9 +86,10 @@ namespace SimplePaintTests
 
 			_unitUnderTest.StartDrawingFigure(point, color, strokeThickness);
 			var currentFigure = _unitUnderTest.CurrentFigure;
+			var firstVertex = currentFigure.Vertices.First.Value;
 
 			Assert.IsNotNull(currentFigure);
-			Assert.AreEqual(point, currentFigure.FirstVertex.Position);
+			Assert.AreEqual(point, firstVertex.Position);
 			Assert.AreEqual(color, currentFigure.FigureColor);
 			Assert.AreEqual(strokeThickness, currentFigure.StrokeThickness);
 		}

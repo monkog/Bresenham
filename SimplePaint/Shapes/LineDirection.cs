@@ -26,11 +26,11 @@ namespace SimplePaint.Shapes
 
 		public LineDirection(CustomLine line)
 		{
-			var dx = line.EndPoint.X - line.StartPoint.X;
+			var dx = line.EndPoint.Position.X - line.StartPoint.Position.X;
 			IncrementX = Math.Sign(dx);
 			Dx = Math.Abs(dx);
 
-			var dy = line.EndPoint.Y - line.StartPoint.Y;
+			var dy = line.EndPoint.Position.Y - line.StartPoint.Position.Y;
 			IncrementY = Math.Sign(dy);
 			Dy = Math.Abs(dy);
 		}

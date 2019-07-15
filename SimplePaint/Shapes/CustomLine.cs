@@ -13,14 +13,14 @@ namespace SimplePaint.Shapes
 		/// <summary>
 		/// Gets or sets the start point.
 		/// </summary>
-		public Point StartPoint { get; set; }
+		public CustomEllipse StartPoint { get; set; }
 
 		/// <summary>
 		/// Gets or sets the end point.
 		/// </summary>
-		public Point EndPoint { get; set; }
+		public CustomEllipse EndPoint { get; set; }
 
-		public CustomLine(Point startPoint, Point endPoint)
+		public CustomLine(CustomEllipse startPoint, CustomEllipse endPoint)
 		{
 			StartPoint = startPoint;
 			EndPoint = endPoint;
@@ -40,8 +40,8 @@ namespace SimplePaint.Shapes
 			var downPixels = thickness - upPixels;
 
 			var direction = new LineDirection(this);
-			DrawPixel(graphics, brush, StartPoint);
-			DrawPixel(graphics, brush, EndPoint);
+			DrawPixel(graphics, brush, StartPoint.Position);
+			DrawPixel(graphics, brush, EndPoint.Position);
 
 			if (direction.Dx > direction.Dy)
 				DrawHorizontalLine(graphics, brush, direction, upPixels, downPixels);
@@ -51,15 +51,15 @@ namespace SimplePaint.Shapes
 
 		private void DrawHorizontalLine(Graphics graphics, Brush brush, LineDirection direction, int upPixels, int downPixels)
 		{
-			var x = StartPoint.X;
-			var y = StartPoint.Y;
+			var x = StartPoint.Position.X;
+			var y = StartPoint.Position.Y;
 
 			// The precise step delta
 			var d0 = 2 * direction.Dy - direction.Dx;
 			var dE = 2 * direction.Dy;
 			var dNe = 2 * (direction.Dy - direction.Dx);
 
-			while (x != EndPoint.X)
+			while (x != EndPoint.Position.X)
 			{
 				if (d0 < 0) //Choose E and W
 				{
@@ -79,15 +79,15 @@ namespace SimplePaint.Shapes
 
 		private void DrawVerticalLine(Graphics graphics, Brush brush, LineDirection direction, int upPixels, int downPixels)
 		{
-			var x = StartPoint.X;
-			var y = StartPoint.Y;
+			var x = StartPoint.Position.X;
+			var y = StartPoint.Position.Y;
 
 			// The precise step delta
 			var d0 = 2 * direction.Dx - direction.Dy;
 			var dE = 2 * direction.Dx;
 			var dNe = 2 * (direction.Dx - direction.Dy);
 
-			while (y != EndPoint.Y)
+			while (y != EndPoint.Position.Y)
 			{
 				if (d0 < 0) //Choose E and W
 				{
@@ -130,7 +130,7 @@ namespace SimplePaint.Shapes
 			//graphics.DrawPolygon(pen, points);
 			if (StartPoint == EndPoint) return;
 
-			bmp = new Bitmap(Math.Abs(StartPoint.X - EndPoint.X), Math.Abs(StartPoint.Y - EndPoint.Y), graphics);
+			bmp = new Bitmap(Math.Abs(StartPoint.Position.X - EndPoint.Position.X), Math.Abs(StartPoint.Position.Y - EndPoint.Position.Y), graphics);
 			Point point;
 			double alpha;
 			for (var i = 0; i < bmp.Width; i += 2)

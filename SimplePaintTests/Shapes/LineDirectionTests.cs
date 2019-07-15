@@ -13,7 +13,9 @@ namespace SimplePaintTests.Shapes
 		[DataRow(1, 1, 1, 1, 0, 0, 0, 0)]
 		public void Ctor_Line_PropertiesAssigned(int x1, int y1, int x2, int y2, int dx, int dy, int incrementX, int incrementY)
 		{
-			var line = new CustomLine(new Point(x1, y1), new Point(x2, y2));
+			var from = new CustomEllipse(new Point(x1, y1));
+			var to = new CustomEllipse(new Point(x2, y2));
+			var line = new CustomLine(from, to);
 
 			var lineDirection = new LineDirection(line);
 
