@@ -45,13 +45,14 @@ namespace SimplePaint.Shapes
 		public int MinY { get; set; }
 
 		/// <summary>
-		/// The figure shapes
+		/// Gets the figure lines.
 		/// </summary>
-		public LinkedList<IShape> FigureShapes { get; set; }
+		public LinkedList<CustomLine> Lines { get; }
+
 		/// <summary>
 		/// Gets or sets the figure vertices.
 		/// </summary>
-		public LinkedList<CustomEllipse> Vertices { get; set; }
+		public LinkedList<CustomEllipse> Vertices { get; }
 
 		/// <summary>
 		/// Gets the value determining whether this figure is selected.
@@ -81,8 +82,7 @@ namespace SimplePaint.Shapes
 			Vertices = new LinkedList<CustomEllipse>();
 			var firstVertex = new CustomEllipse(point);
 			Vertices.AddFirst(firstVertex);
-			FigureShapes = new LinkedList<IShape>();
-			FigureShapes.AddFirst(firstVertex);
+			Lines = new LinkedList<CustomLine>();
 			MultisamplingLine = null;
 			UpdateBoundingBox();
 		}
@@ -96,21 +96,25 @@ namespace SimplePaint.Shapes
 		{
 			if (IsVertex(point, out _)) return;
 
-			var lineToSplit = FigureShapes.Find(line);
-			var lineStart = lineToSplit.Previous;
-			var lineEnd = lineToSplit.Next ?? FigureShapes.First;
-
-			var previousEllipse = lineStart.Value as CustomEllipse;
-			var nextEllipse = lineEnd.Value as CustomEllipse;
-
-			FigureShapes.Remove(line);
-
+			var lineToSplit = Lines.Find(line);
 			var newVertex = new CustomEllipse(point);
-			FigureShapes.AddAfter(lineStart, new CustomLine(previousEllipse, newVertex));
-			FigureShapes.AddAfter(lineStart.Next, newVertex);
-			FigureShapes.AddAfter(lineStart.Next.Next, new CustomLine(newVertex, nextEllipse));
+			Vertices.AddAfter(Vertices.Find(line.StartPoint), newVertex);
+			Lines.Remove(line);
 
-			Vertices.AddAfter(Vertices.Find(FindVertexAtPoint(previousEllipse.Position)), newVertex);
+			var firstLine = new CustomLine(lineToSplit.Value.StartPoint, newVertex);
+			var secondLine = new CustomLine(newVertex, lineToSplit.Value.EndPoint);
+			if (lineToSplit.Previous == null)
+			{
+				Lines.AddFirst(firstLine);
+				Lines.AddFirst(secondLine);
+			}
+			else
+			{
+				var previousLine = lineToSplit.Previous;
+				Lines.AddAfter(previousLine, firstLine);
+				Lines.AddAfter(previousLine.Next, secondLine);
+			}
+
 			UpdateBoundingBox();
 		}
 
@@ -150,7 +154,7 @@ namespace SimplePaint.Shapes
 		/// <returns>The line containing the point or null if no line contains this point.</returns>
 		public CustomLine GetLineContainingPoint(Point point)
 		{
-			foreach (var line in FigureShapes.OfType<CustomLine>())
+			foreach (var line in Lines)
 			{
 				var startX = line.StartPoint.Position.X;
 				var startY = line.StartPoint.Position.Y;
@@ -258,8 +262,8 @@ namespace SimplePaint.Shapes
 
 			var firstVertex = Vertices.First.Value;
 			var lastVertex = Vertices.Last.Value;
-			FigureShapes.Remove(FigureShapes.OfType<CustomLine>().LastOrDefault());
-			FigureShapes.AddLast(new CustomLine(lastVertex, firstVertex));
+			if (!Vertices.Contains(Lines.Last.Value.EndPoint)) Lines.Remove(Lines.Last());
+			Lines.AddLast(new CustomLine(lastVertex, firstVertex));
 			UpdateBoundingBox();
 
 			return false;
@@ -271,9 +275,9 @@ namespace SimplePaint.Shapes
 		/// <param name="point">The line's end point.</param>
 		public void DrawTemporaryLine(Point point)
 		{
-			if (FigureShapes.Last.Value is CustomLine) FigureShapes.Remove(FigureShapes.Last());
+			if (Lines.Any() && !Vertices.Contains(Lines.Last.Value.EndPoint)) Lines.Remove(Lines.Last());
 			var lastVertex = Vertices.Last.Value;
-			FigureShapes.AddLast(new CustomLine(lastVertex, new CustomEllipse(point)));
+			Lines.AddLast(new CustomLine(lastVertex, new CustomEllipse(point)));
 		}
 
 		/// <summary>
@@ -283,8 +287,11 @@ namespace SimplePaint.Shapes
 		/// <param name="withMultisampling">Determines whether multisampling algorithm should be used.</param>
 		public void Draw(Graphics graphics, bool withMultisampling = false)
 		{
-			foreach (var shape in FigureShapes.Where(shape => shape != MultisamplingLine))
-				shape.Draw(graphics, FigureColor, StrokeThickness);
+			foreach (var vertex in Vertices)
+				vertex.Draw(graphics, FigureColor, StrokeThickness);
+
+			foreach (var line in Lines.Where(line => line != MultisamplingLine))
+				line.Draw(graphics, FigureColor, StrokeThickness);
 
 			var color = withMultisampling ? _multisamplingColor : FigureColor;
 			MultisamplingLine?.Draw(graphics, color, StrokeThickness);
@@ -300,11 +307,10 @@ namespace SimplePaint.Shapes
 			if (IsVertex(point, out _)) return;
 
 			var vertex = new CustomEllipse(point);
-			FigureShapes.Remove(FigureShapes.OfType<CustomLine>().LastOrDefault());
-			FigureShapes.AddLast(new CustomLine(Vertices.Last.Value, vertex));
-
+			var lastLine = Lines.LastOrDefault();
+			if (lastLine != null && !Vertices.Contains(lastLine.EndPoint)) Lines.Remove(Lines.LastOrDefault());
+			Lines.AddLast(new CustomLine(Vertices.Last.Value, vertex));
 			Vertices.AddLast(vertex);
-			FigureShapes.AddLast(vertex);
 
 			UpdateBoundingBox();
 		}

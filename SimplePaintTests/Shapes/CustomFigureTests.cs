@@ -26,6 +26,7 @@ namespace SimplePaintTests.Shapes
 			_unitUnderTest.TryAddVertex(new Point(20, -20));
 			_unitUnderTest.TryAddVertex(new Point(20, 20));
 			_unitUnderTest.TryAddVertex(new Point(0, 0));
+			_unitUnderTest.TryAddVertex(new Point(-20, 20));
 		}
 
 		[DataTestMethod]
@@ -103,8 +104,7 @@ namespace SimplePaintTests.Shapes
 		[TestMethod]
 		public void AddVertexOnLine_PointAndLine_VertexAdded()
 		{
-			Assert.Fail("Adjust class responsibilities and add respective tests");
-			var line = _unitUnderTest.FigureShapes.OfType<CustomLine>().First();
+			var line = _unitUnderTest.Lines.First();
 			var vertexCount = _unitUnderTest.Vertices.Count;
 
 			_unitUnderTest.AddVertexOnLine(new Point(-20, 0), line);
@@ -118,7 +118,7 @@ namespace SimplePaintTests.Shapes
 			var point = new Point(20, 20);
 			var vertexCount = _unitUnderTest.Vertices.Count;
 
-			var line = new CustomLine(new CustomEllipse(point),new CustomEllipse(point));
+			var line = new CustomLine(new CustomEllipse(point), new CustomEllipse(point));
 			_unitUnderTest.AddVertexOnLine(point, line);
 
 			Assert.AreEqual(vertexCount, _unitUnderTest.Vertices.Count);
@@ -161,15 +161,33 @@ namespace SimplePaintTests.Shapes
 		}
 
 		[TestMethod]
-		public void Move_Delta_LinesUpdated()
+		public void MoveSelectedVertex_Delta_BoundingBoxUpdated()
 		{
-			Assert.Fail();
+			var minX = _unitUnderTest.MinX;
+			var maxX = _unitUnderTest.MaxX;
+			var minY = _unitUnderTest.MinY;
+			var maxY = _unitUnderTest.MaxY;
+			_unitUnderTest.Vertices.ElementAt(1).Select();
+
+			_unitUnderTest.MoveSelectedVertex(-10, -19);
+
+			Assert.AreNotEqual(minX, _unitUnderTest.MinX);
+			Assert.AreEqual(-30, _unitUnderTest.MinX);
+			Assert.AreEqual(maxX, _unitUnderTest.MaxX);
+			Assert.AreNotEqual(minY, _unitUnderTest.MinY);
+			Assert.AreEqual(-39, _unitUnderTest.MinY);
+			Assert.AreEqual(maxY, _unitUnderTest.MaxY);
 		}
 
 		[TestMethod]
-		public void MoveVertex_Delta_LinesUpdated()
+		public void MoveSelectedVertex_Delta_VertexUpdated()
 		{
-			Assert.Fail();
+			_unitUnderTest.Vertices.ElementAt(1).Select();
+
+			_unitUnderTest.Move(-10, -19);
+
+			Assert.AreEqual(-30, _unitUnderTest.SelectedVertex.Position.X);
+			Assert.AreEqual(-39, _unitUnderTest.SelectedVertex.Position.Y);
 		}
 
 		[TestMethod]
@@ -238,13 +256,22 @@ namespace SimplePaintTests.Shapes
 			Assert.AreEqual(expected, result);
 		}
 
+		[DataTestMethod]
+		[DataRow(-10, -10, true, DisplayName = "Inside figure")]
+		[DataRow(10, 10, true, DisplayName = "On edge")]
+		[DataRow(400, 400, false, DisplayName = "Outside bounding box")]
+		[DataRow(0, 10, false, DisplayName = "Outside figure, inside bounding box")]
+		public void ContainsPoint_Point_Result(int x, int y, bool expected)
+		{
+			var result = _unitUnderTest.ContainsPoint(new Point(x, y));
+
+			Assert.AreEqual(expected, result);
+		}
+
 		[TestMethod]
 		public void GetLineContainingPoint_NoLineContainsPoint_Null()
 		{
-			var line = new CustomLine(new CustomEllipse(new Point(1, 2)), new CustomEllipse(new Point(1, 4)));
-			_unitUnderTest.FigureShapes.AddLast(line);
-
-			var result = _unitUnderTest.GetLineContainingPoint(new Point(7, 9));
+			var result = _unitUnderTest.GetLineContainingPoint(new Point(100, 200));
 
 			Assert.IsNull(result);
 		}
@@ -252,10 +279,9 @@ namespace SimplePaintTests.Shapes
 		[TestMethod]
 		public void GetLineContainingPoint_LineContainsPoint_Line()
 		{
-			var line = new CustomLine(new CustomEllipse(new Point(1, 2)), new CustomEllipse(new Point(1, 4)));
-			_unitUnderTest.FigureShapes.AddLast(line);
+			var line = _unitUnderTest.Lines.First.Value;
 
-			var result = _unitUnderTest.GetLineContainingPoint(new Point(1, 3));
+			var result = _unitUnderTest.GetLineContainingPoint(new Point(-20, 0));
 
 			Assert.IsNotNull(result);
 			Assert.AreEqual(line, result);
@@ -264,10 +290,9 @@ namespace SimplePaintTests.Shapes
 		[TestMethod]
 		public void GetLineContainingPoint_PointCloseToLine_Line()
 		{
-			var line = new CustomLine(new CustomEllipse(new Point(1, 2)), new CustomEllipse(new Point(1, 4)));
-			_unitUnderTest.FigureShapes.AddLast(line);
+			var line = _unitUnderTest.Lines.First.Value;
 
-			var result = _unitUnderTest.GetLineContainingPoint(new Point(2, 3));
+			var result = _unitUnderTest.GetLineContainingPoint(new Point(-20, 3));
 
 			Assert.IsNotNull(result);
 			Assert.AreEqual(line, result);
@@ -282,7 +307,7 @@ namespace SimplePaintTests.Shapes
 			var result = unitUnderTest.TryAddVertex(point);
 
 			Assert.IsTrue(result);
-			Assert.IsTrue(unitUnderTest.FigureShapes.OfType<CustomEllipse>().Any(e => e.Position == point));
+			Assert.IsTrue(unitUnderTest.Vertices.Any(e => e.Position == point));
 		}
 
 		[TestMethod]
@@ -295,7 +320,7 @@ namespace SimplePaintTests.Shapes
 			var result = unitUnderTest.TryAddVertex(point);
 
 			Assert.IsTrue(result);
-			Assert.IsTrue(unitUnderTest.FigureShapes.OfType<CustomEllipse>().Any(e => e.Position == point));
+			Assert.IsTrue(unitUnderTest.Vertices.Any(e => e.Position == point));
 		}
 
 		[TestMethod]
@@ -309,7 +334,7 @@ namespace SimplePaintTests.Shapes
 			var result = unitUnderTest.TryAddVertex(point);
 
 			Assert.IsTrue(result);
-			Assert.IsTrue(unitUnderTest.FigureShapes.OfType<CustomEllipse>().Any(e => e.Position == point));
+			Assert.IsTrue(unitUnderTest.Vertices.Any(e => e.Position == point));
 		}
 
 		[TestMethod]
@@ -323,7 +348,7 @@ namespace SimplePaintTests.Shapes
 			var result = unitUnderTest.TryAddVertex(point);
 
 			Assert.IsFalse(result);
-			Assert.IsFalse(unitUnderTest.FigureShapes.OfType<CustomEllipse>().Any(e => e.Position == point));
+			Assert.IsFalse(unitUnderTest.Vertices.Any(e => e.Position == point));
 		}
 
 		[TestMethod]
@@ -333,22 +358,19 @@ namespace SimplePaintTests.Shapes
 
 			_unitUnderTest.DrawTemporaryLine(point);
 
-			var lastShape = _unitUnderTest.FigureShapes.Last();
-			Assert.IsInstanceOfType(lastShape, typeof(CustomLine));
-			Assert.AreEqual(point, ((CustomLine)lastShape).EndPoint);
+			var lastLine = _unitUnderTest.Lines.Last();
+			Assert.AreEqual(point, lastLine.EndPoint.Position);
 		}
 
 		[TestMethod]
 		public void DrawTemporaryLine_Always_LastTemporaryLineRemoved()
 		{
 			var lastLine = new CustomLine(new CustomEllipse(new Point(1, 10)), new CustomEllipse(new Point(20, 50)));
-			_unitUnderTest.FigureShapes.AddLast(lastLine);
+			_unitUnderTest.Lines.AddLast(lastLine);
 
 			_unitUnderTest.DrawTemporaryLine(new Point(100, 100));
 
-			var lastShape = _unitUnderTest.FigureShapes.Last();
-			Assert.AreNotEqual(lastLine, lastShape);
-			CollectionAssert.DoesNotContain(_unitUnderTest.FigureShapes, lastLine);
+			CollectionAssert.DoesNotContain(_unitUnderTest.Lines, lastLine);
 		}
 	}
 }
