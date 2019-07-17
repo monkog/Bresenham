@@ -279,7 +279,7 @@ namespace SimplePaintTests.Shapes
 		[TestMethod]
 		public void GetLineContainingPoint_LineContainsPoint_Line()
 		{
-			var line = _unitUnderTest.Lines.First.Value;
+			var line = _unitUnderTest.Lines.First();
 
 			var result = _unitUnderTest.GetLineContainingPoint(new Point(-20, 0));
 
@@ -290,7 +290,7 @@ namespace SimplePaintTests.Shapes
 		[TestMethod]
 		public void GetLineContainingPoint_PointCloseToLine_Line()
 		{
-			var line = _unitUnderTest.Lines.First.Value;
+			var line = _unitUnderTest.Lines.First();
 
 			var result = _unitUnderTest.GetLineContainingPoint(new Point(-20, 3));
 
@@ -366,7 +366,7 @@ namespace SimplePaintTests.Shapes
 		public void DrawTemporaryLine_Always_LastTemporaryLineRemoved()
 		{
 			var lastLine = new CustomLine(new CustomEllipse(new Point(1, 10)), new CustomEllipse(new Point(20, 50)));
-			_unitUnderTest.Lines.AddLast(lastLine);
+			_unitUnderTest.Lines.Add(lastLine);
 
 			_unitUnderTest.DrawTemporaryLine(new Point(100, 100));
 

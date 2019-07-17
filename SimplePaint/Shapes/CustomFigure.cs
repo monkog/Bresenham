@@ -47,7 +47,7 @@ namespace SimplePaint.Shapes
 		/// <summary>
 		/// Gets the figure lines.
 		/// </summary>
-		public LinkedList<CustomLine> Lines { get; }
+		public List<CustomLine> Lines { get; }
 
 		/// <summary>
 		/// Gets or sets the figure vertices.
@@ -82,7 +82,7 @@ namespace SimplePaint.Shapes
 			Vertices = new LinkedList<CustomEllipse>();
 			var firstVertex = new CustomEllipse(point);
 			Vertices.AddFirst(firstVertex);
-			Lines = new LinkedList<CustomLine>();
+			Lines = new List<CustomLine>();
 			MultisamplingLine = null;
 			UpdateBoundingBox();
 		}
@@ -96,24 +96,14 @@ namespace SimplePaint.Shapes
 		{
 			if (IsVertex(point, out _)) return;
 
-			var lineToSplit = Lines.Find(line);
 			var newVertex = new CustomEllipse(point);
 			Vertices.AddAfter(Vertices.Find(line.StartPoint), newVertex);
 			Lines.Remove(line);
 
-			var firstLine = new CustomLine(lineToSplit.Value.StartPoint, newVertex);
-			var secondLine = new CustomLine(newVertex, lineToSplit.Value.EndPoint);
-			if (lineToSplit.Previous == null)
-			{
-				Lines.AddFirst(firstLine);
-				Lines.AddFirst(secondLine);
-			}
-			else
-			{
-				var previousLine = lineToSplit.Previous;
-				Lines.AddAfter(previousLine, firstLine);
-				Lines.AddAfter(previousLine.Next, secondLine);
-			}
+			var firstLine = new CustomLine(line.StartPoint, newVertex);
+			var secondLine = new CustomLine(newVertex, line.EndPoint);
+			Lines.Add(firstLine);
+			Lines.Add(secondLine);
 
 			UpdateBoundingBox();
 		}
@@ -262,8 +252,8 @@ namespace SimplePaint.Shapes
 
 			var firstVertex = Vertices.First.Value;
 			var lastVertex = Vertices.Last.Value;
-			if (!Vertices.Contains(Lines.Last.Value.EndPoint)) Lines.Remove(Lines.Last());
-			Lines.AddLast(new CustomLine(lastVertex, firstVertex));
+			if (!Vertices.Contains(Lines.Last().EndPoint)) Lines.Remove(Lines.Last());
+			Lines.Add(new CustomLine(lastVertex, firstVertex));
 			UpdateBoundingBox();
 
 			return false;
@@ -275,9 +265,9 @@ namespace SimplePaint.Shapes
 		/// <param name="point">The line's end point.</param>
 		public void DrawTemporaryLine(Point point)
 		{
-			if (Lines.Any() && !Vertices.Contains(Lines.Last.Value.EndPoint)) Lines.Remove(Lines.Last());
+			if (Lines.Any() && !Vertices.Contains(Lines.Last().EndPoint)) Lines.Remove(Lines.Last());
 			var lastVertex = Vertices.Last.Value;
-			Lines.AddLast(new CustomLine(lastVertex, new CustomEllipse(point)));
+			Lines.Add(new CustomLine(lastVertex, new CustomEllipse(point)));
 		}
 
 		/// <summary>
@@ -309,7 +299,7 @@ namespace SimplePaint.Shapes
 			var vertex = new CustomEllipse(point);
 			var lastLine = Lines.LastOrDefault();
 			if (lastLine != null && !Vertices.Contains(lastLine.EndPoint)) Lines.Remove(Lines.LastOrDefault());
-			Lines.AddLast(new CustomLine(Vertices.Last.Value, vertex));
+			Lines.Add(new CustomLine(Vertices.Last.Value, vertex));
 			Vertices.AddLast(vertex);
 
 			UpdateBoundingBox();
