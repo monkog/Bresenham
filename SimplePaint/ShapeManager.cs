@@ -96,6 +96,7 @@ namespace SimplePaint
 				var line = figure.GetLineContainingPoint(point);
 				if (line == null) continue;
 				figure.MultisamplingLine = line;
+				return;
 			}
 		}
 
