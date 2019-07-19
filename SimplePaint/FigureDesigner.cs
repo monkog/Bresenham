@@ -93,6 +93,7 @@ namespace SimplePaint
 				case FormState.DrawFigure:
 					changeColorButton.Enabled = false;
 					changeSizeButton.Enabled = false;
+					colorPictureBox.Enabled = false;
 
 					if (_shapeManager.CurrentFigure == null)
 					{
@@ -105,6 +106,7 @@ namespace SimplePaint
 					{
 						changeColorButton.Enabled = true;
 						changeSizeButton.Enabled = true;
+						colorPictureBox.Enabled = true;
 					}
 
 					break;
@@ -219,6 +221,7 @@ namespace SimplePaint
 					changeSizeButton.Enabled = true;
 					drawFigureButton.Enabled = true;
 					multisamplingButton.Enabled = false;
+					colorPictureBox.Enabled = true;
 					Cursor = Cursors.Cross;
 					break;
 				case FormState.AddVertex:
@@ -228,6 +231,7 @@ namespace SimplePaint
 					changeSizeButton.Enabled = false;
 					drawFigureButton.Enabled = false;
 					multisamplingButton.Enabled = false;
+					colorPictureBox.Enabled = false;
 					break;
 				case FormState.ChangeColor:
 					changeColorButton.Text = Resources.Cancel;
@@ -236,6 +240,7 @@ namespace SimplePaint
 					changeSizeButton.Enabled = false;
 					drawFigureButton.Enabled = false;
 					multisamplingButton.Enabled = false;
+					colorPictureBox.Enabled = true;
 					break;
 				case FormState.Multisampling:
 					multisamplingButton.Text = Resources.Cancel;
@@ -244,6 +249,7 @@ namespace SimplePaint
 					changeSizeButton.Enabled = false;
 					drawFigureButton.Enabled = false;
 					multisamplingButton.Enabled = true;
+					colorPictureBox.Enabled = false;
 					break;
 				case FormState.ChangeThickness:
 					changeSizeButton.Text = Resources.Cancel;
@@ -252,6 +258,7 @@ namespace SimplePaint
 					changeSizeButton.Enabled = true;
 					drawFigureButton.Enabled = false;
 					multisamplingButton.Enabled = false;
+					colorPictureBox.Enabled = false;
 					break;
 				case FormState.Default:
 					Cursor = Cursors.Default;
@@ -260,6 +267,7 @@ namespace SimplePaint
 					changeSizeButton.Enabled = true;
 					drawFigureButton.Enabled = true;
 					multisamplingButton.Enabled = true;
+					colorPictureBox.Enabled = true;
 					break;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(state), state, null);

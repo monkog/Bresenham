@@ -125,6 +125,7 @@
 			this.colorPictureBox.Size = new System.Drawing.Size(94, 94);
 			this.colorPictureBox.TabIndex = 5;
 			this.colorPictureBox.TabStop = false;
+			this.colorPictureBox.Click += new System.EventHandler(this.ToChangeColorState);
 			// 
 			// colorLabel
 			// 
