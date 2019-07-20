@@ -15,12 +15,16 @@ In each step of the algorithm the `x` coordinate increment is constant `Δx=1`. 
 
 1. Mark the line's start coordinates as (x<sub>0</sub>,y<sub>0</sub>) and (x<sub>1</sub>,y<sub>1</sub>)
 2.  Compute the overall line's increment of x and y coordinates as `dx` and `dy`
-	![dx=x1-x0](https://latex.codecogs.com/gif.latex?dx&space;=&space;x_{1}-x_{0}) 
-	![dy=y1-y0](https://latex.codecogs.com/gif.latex?dy&space;=&space;y_{1}-y_{0}) 
+ 
+	>![dx=x1-x0](https://latex.codecogs.com/gif.latex?dx&space;=&space;x_{1}-x_{0})  
+	>![dy=y1-y0](https://latex.codecogs.com/gif.latex?dy&space;=&space;y_{1}-y_{0})  
+
 3. Compute the precise step increment in `y` coordinate and the  E and NE approximations
-	 ![d=2dy-dx](https://latex.codecogs.com/gif.latex?d&space;=&space;2&space;dy-dx) 
-	 ![dE=2dy](https://latex.codecogs.com/gif.latex?dE&space;=&space;2&space;dy) 
-	 ![dNE=2(dy-dx)](https://latex.codecogs.com/gif.latex?dNE&space;=&space;2&space;(dy-dx)) 
+ 
+	>![d=2dy-dx](https://latex.codecogs.com/gif.latex?d&space;=&space;2&space;dy-dx)  
+	>![dE=2dy](https://latex.codecogs.com/gif.latex?dE&space;=&space;2&space;dy)  
+	>![dNE=2(dy-dx)](https://latex.codecogs.com/gif.latex?dNE&space;=&space;2&space;(dy-dx))  
+
 4. If `d < 0` draw the E pixel, otherwise draw the NE pixel
 
 ## :link: Useful links
