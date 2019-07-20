@@ -9,7 +9,7 @@ Bresenham's algorithm is a commonly used method for drawing lines. It's operatin
 
 The presented algorithm describes drawing lines for the first octant on the Cartesian Coordinate System.
 
-In each step of the algorithm the `x` coordinate increment is constant `?x=1`. The Bresenham's algorithm allows to compute the `y` coordinate increment. It can be either the E pixel or the NE pixel.
+In each step of the algorithm the `x` coordinate increment is constant `Δx=1`. The Bresenham's algorithm allows to compute the `y` coordinate increment. It can be either the E pixel or the NE pixel.
 
 ![Position of E and NE pixels](./.Docs/Bresenham.png)
 
