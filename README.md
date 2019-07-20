@@ -11,7 +11,7 @@ The presented algorithm describes drawing lines for the first octant on the Cart
 
 In each step of the algorithm the `x` coordinate increment is constant `?x=1`. The Bresenham's algorithm allows to compute the `y` coordinate increment. It can be either the E pixel or the NE pixel.
 
-![Position of E and NE pixels](./Docs/Bresenham.png)
+![Position of E and NE pixels](./.Docs/Bresenham.png)
 
 1. Mark the line's start coordinates as (x<sub>0</sub>,y<sub>0</sub>) and (x<sub>1</sub>,y<sub>1</sub>)
 2.  Compute the overall line's increment of x and y coordinates as `dx` and `dy`
