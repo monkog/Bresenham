@@ -147,14 +147,6 @@ namespace SimplePaint.Shapes
 				}
 		}
 
-		void IntensifyPixel(int x, int y, double distance, Graphics graphics, Color color)
-		{
-			var intensity = Math.Round(Math.Abs(distance));
-			var intIntensity = (int)(intensity * 255);
-			graphics.FillRectangle(new SolidBrush(Color.FromArgb(intIntensity, color)), new Rectangle(new Point(x, y), PixelSize));
-			//WritePixel(x, y, intensity);
-		}
-
 		private static void DrawPixel(Graphics graphics, Brush brush, Point point)
 		{
 			graphics.FillRectangle(brush, new Rectangle(point, new Size(1, 1)));
