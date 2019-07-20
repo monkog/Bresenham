@@ -25,4 +25,5 @@ In each step of the algorithm the `x` coordinate increment is constant `?x=1`. T
 
 ## :link: Useful links
 :art: [Bresenham's algorithm on Wikipedia](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm) 
+
 :art: [Bresenham's algorithm described for all octants in Cartesian Coordinate System](https://www.cs.helsinki.fi/group/goa/mallinnus/lines/bresenh.html)
