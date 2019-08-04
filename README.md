@@ -1,10 +1,10 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/on5axvlce94qvk73?svg=true)](https://ci.appveyor.com/project/monkog/simple-paint)
-## :art: Simple paint
+# :art: Simple paint
 Simple paint allows you to compose figures from a set of lines and manipulate the created shapes. Every line is drawn pixel by pixel uisng Bresenham algorithm.
 
 ![Sample application usage](./.Docs/Program.gif)
 
-### Bresenham's line algorithm
+## Bresenham's line algorithm
 Bresenham's algorithm is a commonly used method for drawing lines. It's operating on integer values, which makes it quick, efficient and simple. Being so fast and cheep for computers to process, Bresenham's algorithm became widely used in many graphics libraries as well as in hardware (plotters, graphic cards). It's possible to extend the algorithm to draw circles as well.
 
 The presented algorithm describes drawing lines for the first octant on the Cartesian Coordinate System.
